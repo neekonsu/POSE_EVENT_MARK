@@ -108,21 +108,31 @@ function plot2DCoordinatesFromCSV(t, xCoords, yCoords, likelihood, startColor, e
 
     % Create a 2D plot of x vs. t
     figure;
-    scatter(t, xCoords, 10, colors, 'filled'); % Small dot size
+    hold on;
+    for i = 1:length(t)-1
+        plot(t(i:i+1), xCoords(i:i+1), 'Color', colors(i, :), 'LineWidth', 1.5);
+    end
     colorbar;
     colormap([linspace(startColor(1), endColor(1), 100)', linspace(startColor(2), endColor(2), 100)', linspace(startColor(3), endColor(3), 100)']);
+    clim([min(likelihood), max(likelihood)]);
     xlabel('Frame Number');
     ylabel('X Coordinate');
     title(['2D Plot of ', strrep(selectedBodyPart, '_', ' '), ' (Time, X)']);
-    
+    hold off;
+
     % Create a 2D plot of y vs. t
     figure;
-    scatter(t, yCoords, 10, colors, 'filled'); % Small dot size
+    hold on;
+    for i = 1:length(t)-1
+        plot(t(i:i+1), yCoords(i:i+1), 'Color', colors(i, :), 'LineWidth', 1.5);
+    end
     colorbar;
     colormap([linspace(startColor(1), endColor(1), 100)', linspace(startColor(2), endColor(2), 100)', linspace(startColor(3), endColor(3), 100)']);
+    clim([min(likelihood), max(likelihood)]);
     xlabel('Frame Number');
     ylabel('Y Coordinate');
     title(['2D Plot of ', strrep(selectedBodyPart, '_', ' '), ' (Time, Y)']);
+    hold off;
 end
 
 plot3DAnd2DCoordinatesFromCSV();
