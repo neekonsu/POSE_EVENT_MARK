@@ -1,144 +1,134 @@
 function trim_nsx_by_triggers()
-    % TRIM_NSX_BY_TRIGGERS Trims an ns6 neural data file based on camera trigger events
-    % found in a corresponding ns5 file.
+    % TRIM_NSX_BY_TRIGGERS Trims an ns6 neural data file based on camera triggers
+    % found in a corresponding ns5 file, keeping only the data between the first and
+    % last triggers.
     %
     % This function:
-    % 1. Prompts the user to select necessary directories and files.
-    % 2. Calculates the start and end sample points from the camera triggers.
-    % 3. Trims the ns6 data to include only the relevant samples.
-    % 4. Saves the trimmed data along with the event file to a new output directory.
-    %
-    % Steps:
-    % 1. Prompt the user to select the directory containing supplemental functions
-    %    and add this directory to the MATLAB path.
-    % 2. Prompt the user to select the ECoG data directory and add it to the MATLAB path.
-    % 3. Prompt the user to select a parent directory where the processed files 
-    %    will be saved.
-    % 4. Load the NatalyaElecMap and set the diagnostic plotting option.
-    % 5. Prompt the user to select an event file and extract the subject, date,
-    %    trial type, and trial number from the file name using a regular expression.
-    % 6. Construct the output directory name from the extracted details and create 
-    %    the new output directory within the selected parent directory.
-    % 7. Construct patterns to find the corresponding ns6 and ns5 files based on 
-    %    the extracted details, and search for these files in the ECoG data directory.
-    % 8. Load the ns5 file and identify the starting and ending camera triggers.
-    % 9. Load the ns6 data file and calculate the corresponding sample indices for 
-    %    the camera triggers in the ns6 data using the sample rate conversion.
-    % 10. Trim the ns6 data to the sample range defined by the camera triggers.
-    % 11. Save the trimmed ns6 data to a .mat file in the new output directory.
-    % 12. Copy the selected event file to the output directory for reference.
-    % 13. Clear loaded data from memory and display a completion message.
+    % 1. Prompts the user to select processing mode: interactive or automatic.
+    % 2. Prompts the user to select the ECoG data directory containing the ns5 and ns6 files.
+    % 3. In interactive mode, prompts the user to confirm each ns6 file before processing.
+    % 4. In automatic mode, processes all ns6 files without user confirmation.
+    % 5. Identifies the corresponding ns5 file for each ns6 file.
+    % 6. Uses the ns5 file to find the first and last camera triggers.
+    % 7. Trims the ns6 data based on the first and last camera triggers.
+    % 8. Saves the trimmed data segment to a .mat file in a newly created output directory.
+    % 9. Displays a summary of processed and skipped files in automatic mode.
 
-    % Prompt user to select supplemental function dir to add to path
-    functionPath = uigetdir(pwd, 'Select the directory containing the required functions');
-    if functionPath == 0
-        disp('User canceled the directory selection');
+    % Prompt user for interactive or automatic mode
+    choice = questdlg('Choose processing mode:', ...
+        'Mode Selection', ...
+        'Interactive', 'Automatic', 'Cancel', 'Interactive');
+    if strcmp(choice, 'Cancel')
         return;
     end
-    addpath(functionPath);
-
+    interactiveMode = strcmp(choice, 'Interactive');
+    
     % Prompt the user to select the ECoG data directory
     ecogDataDir = uigetdir(pwd, 'Select the ECoG data directory');
     if ecogDataDir == 0
         disp('User canceled the directory selection');
         return;
     end
-    addpath(ecogDataDir);
 
-    % Prompt the user to select the save directory
-    saveDirParent = uigetdir(pwd, 'Select the parent directory to save the processed files');
-    if saveDirParent == 0
-        disp('User canceled the directory selection');
+    % Get list of ns6 files
+    ns6Files = dir(fullfile(ecogDataDir, '*.ns6'));
+
+    if interactiveMode
+        % Interactive mode: process files with user confirmation
+        for i = 1:length(ns6Files)
+            ns6File = ns6Files(i).name;
+            % Find the corresponding ns5 file
+            ns5Pattern = strrep(ns6File, '.ns6', '.ns5');
+            ns5File = dir(fullfile(ecogDataDir, ns5Pattern));
+            if isempty(ns5File)
+                disp(['Skipping: No corresponding ns5 file found for ', ns6File]);
+                continue;
+            end
+
+            % Confirm with user
+            response = questdlg(sprintf('ns5: %s\nns6: %s', ns5File.name, ns6File), ...
+                'Confirm File', ...
+                'OK', 'Skip', 'OK');
+            if strcmp(response, 'Skip')
+                continue;
+            end
+            
+            % Process the files
+            process_nsx_files(ns6File, ns5File.name, ecogDataDir, outputDir);
+        end
+    else
+        % Automatic mode: process all files without confirmation
+        skippedFiles = {};
+        processedCount = 0;
+        tic; % Start timer
+        
+        for i = 1:length(ns6Files)
+            ns6File = ns6Files(i).name;
+            % Find the corresponding ns5 file
+            ns5Pattern = strrep(ns6File, '.ns6', '.ns5');
+            ns5File = dir(fullfile(ecogDataDir, ns5Pattern));
+            if isempty(ns5File)
+                skippedFiles{end+1} = ns6File; %#ok<AGROW>
+                continue;
+            end
+            
+            % Process the files
+            process_nsx_files(ns6File, ns5File.name, ecogDataDir, outputDir);
+            processedCount = processedCount + 1;
+        end
+        
+        % Display summary
+        elapsedTime = toc;
+        msgbox(sprintf('Processed: %d\nSkipped: %d\nElapsed Time: %.2f seconds', ...
+            processedCount, length(skippedFiles), elapsedTime), ...
+            'Summary');
+    end
+end
+
+function process_nsx_files(ns6File, ns5File, ecogDataDir, saveDirParent)
+    % PROCESS_NSX_FILES Processes and trims the ns6 file based on camera triggers
+    % found in the ns5 file.
+    %
+    % This function:
+    % 1. Loads the ns5 file to find the first and last camera triggers.
+    % 2. Uses these triggers to determine the trimming range for the ns6 file.
+    % 3. Loads the ns6 file and trims it based on the determined range.
+    % 4. Saves the trimmed data segment to a .mat file in a newly created output directory.
+    
+    % Load the ns5 file and find the camera triggers
+    ns5Data = openNSxCervical(fullfile(ecogDataDir, ns5File));
+    ns5SampleRate = ns5Data.MetaTags.SamplingFreq;
+    cameraTrigs = find(diff(ns5Data.Data(5, :)) > 50) + 1;
+    if isempty(cameraTrigs)
+        disp(['No camera triggers found in ', ns5File]);
         return;
     end
-
-    % Prompt the user to select the event file
-    [eventFile, eventPath] = uigetfile(fullfile(pwd, '*.mat'), 'Select the event file');
-    if isequal(eventFile, 0)
-        disp('User canceled the event file selection');
-        return;
-    end
-
-    % Extract the subject, date, trial type, and trial number from the event file name
-    eventPattern = '(\w+)_(\d+)_(\w+)_(\d+)-.*_events.mat';
-    tokens = regexp(eventFile, eventPattern, 'tokens');
-    if isempty(tokens)
-        error('Event file name does not match the expected pattern');
-    end
-    subject = tokens{1}{1};
-    date = tokens{1}{2};
-    trialType = tokens{1}{3};
-    trialNumber = tokens{1}{4};
-
-    % Construct the output directory name from the extracted tokens
-    outputDir = sprintf("%s_%s_%s_%s_dataset", subject, date, trialType, trialNumber);
-
-    % Create the new save directory in the parent directory
-    saveDir = fullfile(saveDirParent, outputDir);
+    
+    % Determine the start and end triggers
+    startTrigger = cameraTrigs(1);
+    endTrigger = cameraTrigs(end);
+    clear ns5Data
+    
+    % Load the ns6 file and determine the trimming range
+    ns6Data = openNSxCervical(fullfile(ecogDataDir, ns6File));
+    ns6SampleRate = ns6Data.MetaTags.SamplingFreq;
+    
+    startSample = startTrigger * ns6SampleRate / ns5SampleRate;
+    endSample = endTrigger * ns6SampleRate / ns5SampleRate;
+    
+    % Trim the ns6 data
+    trimmedData = ns6Data.Data(:, startSample:endSample);
+    
+    % Create the save directory
+    [~, name, ~] = fileparts(ns6File);
+    saveDir = fullfile(saveDirParent, name);
     if ~exist(saveDir, 'dir')
         mkdir(saveDir);
     end
-
-    % Construct the corresponding ns6 file name pattern
-    ns6Pattern = sprintf('%s_%s_%s_%s.ns6', subject, date, trialType, trialNumber);
-
-    % Find the corresponding ns6 file
-    ns6Files = dir(fullfile(ecogDataDir, '*.ns6'));
-    ns6FileMatch = '';
-    for i = 1:length(ns6Files)
-        if contains(ns6Files(i).name, ns6Pattern)
-            ns6FileMatch = ns6Files(i).name;
-            break;
-        end
-    end
-
-    if isempty(ns6FileMatch)
-        error('No corresponding ns6 file found');
-    end
-
-    % Find and load the corresponding ns5 file for camera trigger
-    ns5Pattern = sprintf('%s_%s_%s_%s.ns5', subject, date, trialType, trialNumber);
-    ns5Files = dir(fullfile(ecogDataDir, '*.ns5'));
-    ns5FileMatch = '';
-    for i = 1:length(ns5Files)
-        if contains(ns5Files(i).name, ns5Pattern)
-            ns5FileMatch = ns5Files(i).name;
-            break;
-        end
-    end
-
-    if isempty(ns5FileMatch)
-        error('No corresponding ns5 file found');
-    end
-
-    % Load the ns5 file and find the camera triggers
-    ns5Data = openNSxCervical(fullfile(ecogDataDir, ns5FileMatch));
-    H.ns5SampleRate = ns5Data.MetaTags.SamplingFreq;
-    cameraTrigStart = find(diff(ns5Data.Data(H.ns5VideoCh, :)) > H.ns5VideoThres, 1) + 1;
-    cameraTrigEnd = find(diff(ns5Data.Data(H.ns5VideoCh, :)) > H.ns5VideoThres, 1, 'last') + 1;
-    clear ns5Data
-
-    % Load the ns6 data
-    fpath = fullfile(ecogDataDir, ns6FileMatch);
-    ns6Data = openNSxCervical(fpath);
-    disp(['Loading NS6 file ' ns6FileMatch])
-
-    % Calculate the sample indices for the camera triggers in the ns6 data
-    ns6SampleRate = ns6Data.MetaTags.SamplingFreq;
-    startSample = cameraTrigStart * ns6SampleRate / H.ns5SampleRate;
-    endSample = cameraTrigEnd * ns6SampleRate / H.ns5SampleRate;
-
-    % Trim the ns6 data to the sample range
-    trimmedData = ns6Data.Data(:, startSample:endSample);
-
-    % Save the trimmed ns6 data
-    saveFileName = sprintf('%s_trimmed_%d_%d.mat', ns6FileMatch(1:end-4), startSample, endSample);
-    save(fullfile(saveDir, saveFileName), 'trimmedData', '-v7.3');
-
-    % Copy the event file to the save directory
-    copyfile(fullfile(eventPath, eventFile), saveDir);
-
-    clear ns6Data
-
-    disp('Finished processing and trimming ns6 files.')
+    
+    % Save the trimmed data
+    saveFileName = fullfile(saveDir, sprintf('%s_trimmed.mat', name));
+    save(saveFileName, 'trimmedData', '-v7.3');
+    
+    disp(['Saved trimmed data to ', saveFileName]);
 end

@@ -10,7 +10,7 @@ function split_nsx_by_event_marks()
     % 5. Trims the ns6 data based on the event marks, excluding specified junk data regions.
     % 6. Saves each trimmed data segment to a .mat file in a newly created output directory.
     % 7. Copies the original events file to the output directory for reference.
-    
+
     % Prompt user to select supplemental function dir to add to path
     functionPath = uigetdir(pwd, 'Select the directory containing the required functions');
     if functionPath == 0
@@ -95,22 +95,12 @@ function split_nsx_by_event_marks()
     
     % Load the ns5 file and find the camera trigger
     ns5Data = openNSxCervical(fullfile(ecogDataDir, ns5FileMatch));
-    H.ns5SampleRate = ns5Data.MetaTags.SamplingFreq;
-    cameraTrig = find(diff(ns5Data.Data(H.ns5VideoCh, :)) > H.ns5VideoThres, 1) + 1;
+    ns5SampleRate = ns5Data.MetaTags.SamplingFreq;
+    cameraTrig = find(diff(ns5Data.Data(5, :)) > 50, 1) + 1;
     clear ns5Data
     
     % Parameters
-    H.ns5VideoThres = 50;
-    H.ns5VideoCh = 5;
-    H.targetSampleRate = 2000;
-    H.useBlocks = usedTrials;
-    
-    H.noOfCh = 64;
-    H.ch2rm = [];
-    H.neuroThreshold = 1000;
-    H.neuroChThreshold = 60;
-    H.junkOffset = 0.05 * H.targetSampleRate;
-    H.binSizeSec = 0.15;
+    targetSampleRate = 2000;
     
     % Load events
     fs_simi = 100;
@@ -125,7 +115,7 @@ function split_nsx_by_event_marks()
     end
     
     % Map frame 0 (event data) to the sample in the ns6 data using camera trigger
-    eventSamples = (allEvents + cameraTrig * H.targetSampleRate / H.ns5SampleRate) * H.targetSampleRate / fs_simi;
+    eventSamples = (allEvents + cameraTrig * targetSampleRate / ns5SampleRate) * targetSampleRate / fs_simi;
     
     % Sort the event samples and corresponding names
     [eventSamples, sortIdx] = sort(eventSamples);
