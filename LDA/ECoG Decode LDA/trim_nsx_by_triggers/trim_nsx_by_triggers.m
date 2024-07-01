@@ -54,7 +54,7 @@ function trim_nsx_by_triggers()
             end
             
             % Process the files
-            process_nsx_files(ns6File, ns5File.name, ecogDataDir, outputDir);
+            process_nsx_files(ns6File, ns5File.name, ecogDataDir, ecogDataDir);
         end
     else
         % Automatic mode: process all files without confirmation
