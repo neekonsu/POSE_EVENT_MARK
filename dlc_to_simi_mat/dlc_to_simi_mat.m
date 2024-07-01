@@ -1,4 +1,4 @@
-function createStructFromCSV()
+function dlc_to_simi_mat()
     % Select the CSV file using a file dialog
     [filename, pathname] = uigetfile("*.csv", "Select a CSV file to parse");
 
@@ -66,5 +66,3 @@ function createStructFromCSV()
     disp(['The structure has been created and saved to ', matFilename, ':']);
     disp(dataStruct);
 end
-
-createStructFromCSV();
