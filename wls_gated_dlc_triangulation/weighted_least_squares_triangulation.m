@@ -24,22 +24,43 @@ function points = weighted_least_squares_triangulation(trialDir)
         % Load the keypoints.csv file
         keypoints = readcell(fullfile(camFolder, 'keypoints.csv'));
         
-        % Extract the camera number from the camera folder name
-        camNum = regexp(camFolders(i).name, '\d+', 'match', 'once');
-        
-        % Construct the expected pose CSV filename pattern
-        csvPattern = sprintf('%s-%s*.csv', trialDir, camNum);
-        
-        % Find the corresponding pose CSV file
-        csvFile = dir(fullfile(camFolder, csvPattern));
-        
-        if isempty(csvFile)
-            warning('CSV file not found for camera %s', camFolders(i).name);
-            continue;
-        end
+        % TODO: FIX MATCHING, CURRENTLY NOT MATCHING CORRECTLY
+        % % Extract the camera number from the camera folder name
+        % camNum = regexp(camFolders(i).name, '\d+', 'match', 'once');
+        % 
+        % % Construct the expected pose CSV filename pattern
+        % csvPattern = sprintf('%s-%s*.csv', trialDir, camNum);
+        % 
+        % % List all files in the directory
+        % allFiles = dir(fullfile(camFolder, '*.csv'));
+        % 
+        % % Find the corresponding pose CSV file by matching the beginning of the filename
+        % csvFile = [];
+        % for j = 1:length(allFiles)
+        %     if startsWith(allFiles(j).name, csvPattern)
+        %         csvFile = allFiles(j);
+        %         break;
+        %     end
+        % end
+        % 
+        % % Check if the corresponding pose CSV file was found
+        % if isempty(csvFile)
+        %     error('No corresponding pose CSV file found for %s', camFolders(i).name);
+        % end
+        % 
+        % % Load the pose CSV file
+        % pose = readmatrix(fullfile(camFolder, csvFile(1).name));
 
-        % Load the pose CSV file
-        pose = readmatrix(fullfile(camFolder, csvFile(1).name));
+
+        [csvFilename, csvPathname] = uigetfile("*.csv", "Select a CSV file to parse");
+        if isequal(csvFilename, 0) || isequal(csvPathname, 0)
+            disp('User canceled the CSV file selection');
+            return;
+        end
+        addpath(csvPathname);
+        
+        % Read the entire CSV file without skipping any rows
+        pose = readcell(fullfile(csvPathname, csvFilename));
         
         % Extract the distances (column 5) for each key point
         d1 = keypoints{2, 5};

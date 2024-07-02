@@ -1,7 +1,7 @@
 function create_trial_folders(videosFolderPath)
     
     % Store list of video files in 'videos' path
-    aviFiles = dir(fullfile(videosFolderPath, '*.avi'));
+    aviFiles = dir(fullfile(videosFolderPath, '*.mp4'));
 
     % Iterate avi and csv files to produce desired folder structure
     for i = 1:length(aviFiles)
@@ -35,7 +35,7 @@ function create_trial_folders(videosFolderPath)
         videoFilePath = fullfile(videosFolderPath, aviFiles(i).name);
         video = VideoReader(videoFilePath);
         frame = readFrame(video);
-        frameFileName = sprintf("frame%04d.png", frameIndex);
+        frameFileName = sprintf("frame0001.png");
         imwrite(frame, fullfile(cameraDir, frameFileName));
     end
 end 

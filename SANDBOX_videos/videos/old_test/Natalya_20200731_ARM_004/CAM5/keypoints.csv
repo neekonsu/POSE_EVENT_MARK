@@ -1,0 +1,5 @@
+Point,X (px),Y (px),Distance (px),Distance (m),Angle (rad)
+origin,5.25,173.25,0,0,0
+keypoint1,6.25,3.25,170.0029,10,-1.5649
+keypoint2,168.25,169.25,163.0491,10,-0.024535
+keypoint3,170.25,6.25,234.7637,10,-0.79142
