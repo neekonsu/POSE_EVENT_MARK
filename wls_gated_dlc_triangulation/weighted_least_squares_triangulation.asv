@@ -1,7 +1,4 @@
 function points = weighted_least_squares_triangulation(trialDir)
-    % Store the trialName
-    [~, trialName, ~] = fileparts(trialDir);
-
     % Get list of camera folders [checked]
     camFolders = dir(fullfile(trialDir, '*'));
     camFolders = camFolders([camFolders.isdir] & ~ismember({camFolders.name}, {'.', '..'}));
@@ -21,24 +18,21 @@ function points = weighted_least_squares_triangulation(trialDir)
 
     % Iterate over each camera directory
     for i = 1:numCams
-        % Store Camera Folder
-        camFolder = camFolders(i);
-
         % Define the path for the current camera folder and ls
-        camFolderPath = fullfile(trialDir, camFolder.name);
-        camFiles  = {dir(camFolderPath).name};
-
-        % Extract the camera number from the camera folder name
-        camNum = regexp(camFolder.name, '\d+', 'match', 'once');
+        camFolder = fullfile(trialDir, camFolders(i).name);
+        camFiles  = {dir(camFolder).name};
 
         % Construct the expected pose CSV filename pattern
-        poseFilePattern = sprintf('^%s-%s.*\.csv$', trialName, camNum);
+        csvPattern = sprintf('%s-%s*.csv', trialDir, camNum);
 
-        % Filter files in camera folder by regexp
-        csvFile   = camFiles(~cellfun('isempty', regexp(camFiles, poseFilePattern)));
+        % Filter 
+        csvFile   = camFiles(~cellfun('isempty', regexp(camFiles, )))
         
-        % Load the keypoints.csv file
-        keypoints = readcell(fullfile(camFolder, 'keypoints.csv'));
+        % Extract the camera number from the camera folder name
+        camNum = regexp(camFolders(i).name, '\d+', 'match', 'once');
+
+        % Find the corresponding pose CSV file by matching the beginning of the filename
+        csvFile = dir(fullfile(camFolder, csvPattern));
 
         % Check if the corresponding pose CSV file was found
         if isempty(csvFile)
