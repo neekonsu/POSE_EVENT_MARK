@@ -92,42 +92,45 @@ function points = weighted_least_squares_triangulation(trialDir)
     % Initialize the points matrix
     points = zeros(num_frames, num_points, 3);
 
-    % Iterate over each frame and each point
-    for frame = 1:num_frames
-        for point = 1:num_points
-            % Initialize matrices X, W, and vector y
-            X = [];
-            W = [];
-            y = [];
-            
-            % Construct X, W, and y for all cameras
-            for i = 1:numCams
+    % % TODO: REPLACE WITH CORRECTED LOOP
+    % % Iterate over each frame and each point
+    % for frame = 1:num_frames
+    %     for point = 1:num_points
+    %         % Initialize matrices X, W, and vector y
+    %         X = [];
+    %         W = [];
+    %         y = [];
+    % 
+    %         % Construct X, W, and y for all cameras
+    %         for i = 1:numCams
+    % 
+    %             basis_vectors = basis_vectors_all{i};
+    %             likelihoods = likelihoods_all{i};
+    % 
+    %             x_point = trajectories_all{i}(frame, point, 1);
+    %             y_point = trajectories_all{i}(frame, point, 2);
+    % 
+    %             likelihood = likelihoods(frame, point);
+    % 
+    %             % Add basis vectors to X
+    %             X = [X; basis_vectors];
+    % 
+    %             % Add likelihoods to W
+    %             W = blkdiag(W, likelihood * eye(2));
+    % 
+    %             % Add observations to y
+    %             y = [y; x_point; y_point];
+    %         end
+    % 
+    %         % Solve for the 3D point using weighted least squares
+    %         b = (X' * W * X) \ (X' * W * y);
+    % 
+    %         % Store the 3D coordinates
+    %         points(frame, point, :) = b;
+    %     end
+    % end
 
-                basis_vectors = basis_vectors_all{i};
-                likelihoods = likelihoods_all{i};
-
-                x_point = trajectories_all{i}(frame, point, 1);
-                y_point = trajectories_all{i}(frame, point, 2);
-
-                likelihood = likelihoods(frame, point);
-                
-                % Add basis vectors to X
-                X = [X; basis_vectors];
-                
-                % Add likelihoods to W
-                W = blkdiag(W, likelihood * eye(2));
-                
-                % Add observations to y
-                y = [y; x_point; y_point];
-            end
-            
-            % Solve for the 3D point using weighted least squares
-            b = (X' * W * X) \ (X' * W * y);
-            
-            % Store the 3D coordinates
-            points(frame, point, :) = b;
-        end
-    end
+    
     
     % Display the results
     disp('3D Points:');
