@@ -15,10 +15,6 @@ function points = weighted_least_squares_triangulation(trialDir)
     trajectories_all = cell(numCams, 1);
     likelihoods_all = cell(numCams, 1);
     
-    % Preallocate trajectory and likelihood matrices assuming uniformity across cameras
-    % This will be determined during the first iteration
-    firstCameraProcessed = false;
-
     % Iterate over each camera directory
     for i = 1:numCams
         % Store Camera Folder
@@ -32,13 +28,13 @@ function points = weighted_least_squares_triangulation(trialDir)
         camNum = regexp(camFolder.name, '\d+', 'match', 'once');
 
         % Construct the expected pose CSV filename pattern
-        poseFilePattern = sprintf('^%s-%s.*\.csv$', trialName, camNum);
+        poseFilePattern = sprintf('^%s-%s.*\\.csv$', trialName, camNum);
 
         % Filter files in camera folder by regexp
         csvFile   = camFiles(~cellfun('isempty', regexp(camFiles, poseFilePattern)));
         
         % Load the keypoints.csv file
-        keypoints = readcell(fullfile(camFolder, 'keypoints.csv'));
+        keypoints = readcell(fullfile(camFolderPath, 'keypoints.csv'));
 
         % Check if the corresponding pose CSV file was found
         if isempty(csvFile)
@@ -46,12 +42,12 @@ function points = weighted_least_squares_triangulation(trialDir)
         end
 
         % Load the pose CSV file
-        pose = readmatrix(fullfile(camFolder, csvFile(1).name));
+        pose = readmatrix(fullfile(camFolderPath, csvFile{1}));
         
         % Extract the distances (column 5) for each key point
-        d1 = keypoints{2, 5};
-        d2 = keypoints{3, 5};
-        d3 = keypoints{4, 5};
+        d1 = keypoints{3, 5};
+        d2 = keypoints{4, 5};
+        d3 = keypoints{5, 5};
         
         % Define the basis vectors using the distances
         i_vector = [d1; 0; 0];
@@ -59,15 +55,15 @@ function points = weighted_least_squares_triangulation(trialDir)
         k_vector = [0; 0; d3];
         
         % Define the projections from keypoints
-        P_i = [keypoints{2, 2}; keypoints{2, 3}];
-        P_j = [keypoints{3, 2}; keypoints{3, 3}];
-        P_k = [keypoints{4, 2}; keypoints{4, 3}];
+        P_i = [keypoints{3, 2}; keypoints{3, 3}];
+        P_j = [keypoints{4, 2}; keypoints{4, 3}];
+        P_k = [keypoints{5, 2}; keypoints{5, 3}];
         
         % Stack the projections into a single column vector
         projections = [P_i; P_j; P_k];
         
         % Stack the basis vectors into a matrix
-        basis_vectors = [i_vector, j_vector, k_vector];
+        basis_vectors = [i_vector; j_vector; k_vector];
         
         % Extract the x, y, and likelihood columns from the pose file
         % Assume the pose file has the following columns: scorer, bodyparts, coords (x, y, likelihood)
@@ -75,17 +71,14 @@ function points = weighted_least_squares_triangulation(trialDir)
         y_cols = 3:3:size(pose, 2);
         likelihood_cols = 4:3:size(pose, 2);
         
-        if ~firstCameraProcessed
-            num_frames = size(pose, 1);
-            num_points = length(x_cols);
-            firstCameraProcessed = true;
-            
-            for k = 1:numCams
-                trajectories_all{k} = zeros(num_frames, num_points, 2);
-                likelihoods_all{k} = zeros(num_frames, num_points);
-            end
-        end
-        
+        % Store number of frames & bodyparts for current camera's pose data
+        num_frames = size(pose, 1);
+        num_points = length(x_cols);
+
+        % Create matrix points and likelihoods for current camera
+        trajectories_all{i} = zeros(num_frames, num_points, 2);
+        likelihoods_all{i} = zeros(num_frames, num_points);
+
         % Fill the trajectories and likelihoods matrices
         trajectories_all{i}(:, :, 1) = pose(:, x_cols);
         trajectories_all{i}(:, :, 2) = pose(:, y_cols);
@@ -109,10 +102,13 @@ function points = weighted_least_squares_triangulation(trialDir)
             
             % Construct X, W, and y for all cameras
             for i = 1:numCams
+
                 basis_vectors = basis_vectors_all{i};
                 likelihoods = likelihoods_all{i};
-                x = trajectories_all{i}(frame, point, 1);
+
+                x_point = trajectories_all{i}(frame, point, 1);
                 y_point = trajectories_all{i}(frame, point, 2);
+
                 likelihood = likelihoods(frame, point);
                 
                 % Add basis vectors to X
@@ -122,7 +118,7 @@ function points = weighted_least_squares_triangulation(trialDir)
                 W = blkdiag(W, likelihood * eye(2));
                 
                 % Add observations to y
-                y = [y; x; y_point];
+                y = [y; x_point; y_point];
             end
             
             % Solve for the 3D point using weighted least squares
