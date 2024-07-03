@@ -38,14 +38,14 @@ function plot3DAnd2DCoordinatesFromCSV()
     data = readtable(fullfile(pathname, filename));
     
     % Limit to the first 1000 frames
-    data = data(1:1000, :);
+    data = data(2700:3000, :);
 
     % Extract the body part names from the header row
     bodyParts = data.Properties.VariableNames;
     bodyParts = bodyParts(2:3:end); % Assuming X, Y, and likelihood columns for each part
 
     % Generate frame numbers (t)
-    t = (1:1000)';
+    t = (2700:3000)';
 
     % Create the 3D plot
     figure;
@@ -66,10 +66,6 @@ function plot3DAnd2DCoordinatesFromCSV()
         plotHandles(i) = plot3(t, xCoords, zCoords, 'Color', color, 'LineWidth', 1.5);
     end
     hold off;
-    xlabel('Frame Number');
-    ylabel('X Coordinate');
-    zlabel('Y Coordinate');
-    title('3D Plot of Body Parts (Time, X, Y)');
     grid on;
     legend(plotHandles, strrep(bodyParts, '_', ' '), 'Location', 'northeast');
 
