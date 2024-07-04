@@ -10,15 +10,14 @@ function points = weighted_least_squares_triangulation(trialDir)
     numCams = length(camFolders);
     
     % Initialize storage for basis vectors, projections, trajectories, and likelihoods
-    basis_vectors_all = cell(numCams, 1);
-    projections_all = cell(numCams, 1);
+    projection_mat_all = cell(numCams, 1);
     trajectories_all = cell(numCams, 1);
     likelihoods_all = cell(numCams, 1);
     
     % Iterate over each camera directory
-    for i = 1:numCams
+    for cam = 1:numCams
         % Store Camera Folder
-        camFolder = camFolders(i);
+        camFolder = camFolders(cam);
 
         % Define the path for the current camera folder and ls
         camFolderPath = fullfile(trialDir, camFolder.name);
@@ -38,7 +37,7 @@ function points = weighted_least_squares_triangulation(trialDir)
 
         % Check if the corresponding pose CSV file was found
         if isempty(csvFile)
-            error('No corresponding pose CSV file found for %s', camFolders(i).name);
+            error('No corresponding pose CSV file found for %s', camFolders(cam).name);
         end
 
         % Load the pose CSV file
@@ -49,18 +48,10 @@ function points = weighted_least_squares_triangulation(trialDir)
         d2 = keypoints{4, 5};
         d3 = keypoints{5, 5};
         
-        % Define the basis vectors using the distances
-        i_vector = [d1; 0; 0];
-        j_vector = [0; d2; 0];
-        k_vector = [0; 0; d3];
-        
         % Define the projections from keypoints
         P_i = [keypoints{3, 2}; keypoints{3, 3}];
         P_j = [keypoints{4, 2}; keypoints{4, 3}];
         P_k = [keypoints{5, 2}; keypoints{5, 3}];
-
-        % Stack the basis vectors into a matrix
-        basis_vectors = [i_vector; j_vector; k_vector];
         
         % Given:
         % M: Projection matrix for camera
@@ -68,15 +59,28 @@ function points = weighted_least_squares_triangulation(trialDir)
         % P: point 2D column vector of e projected into camera perspective
         % Then we solve:
         % [m11*d1;m12*d1;m21*d2;m22*d2;m13*d3;m23*d3]=[P_i;P_j;P_k];
-        % To find mij for the 2x3 matrix M corresponding to the current
-        % camera
-        % TODO: REPLACE WITH CORRECT ESTIMATION OF projection_mat for
-        % current camera:
-        % % Stack the projections into a single column vector
-        % projections = [P_i; P_j; P_k];
-        % % Store the basis vectors and projections for this camera
-        % basis_vectors_all{i} = basis_vectors;
-        % projections_all{i} = projections;
+        % To find mij for the 2x3 matrix M corresponding to the camera
+        
+        % Construct the system of equations to solve for the projection matrix elements
+        D = [
+            d1, 0, 0, 0, 0, 0;
+            0, d1, 0, 0, 0, 0;
+            0, 0, d2, 0, 0, 0;
+            0, 0, 0, d2, 0, 0;
+            0, 0, 0, 0, d3, 0;
+            0, 0, 0, 0, 0, d3;
+        ];
+    
+        p_vec = [P_i; P_j; P_k];
+    
+        % Solve for the projection matrix elements
+        m_vec = D \ p_vec;
+    
+        % Reshape the result into the 2x3 projection matrix
+        projection_mat = reshape(m_vec, [2, 3]);
+    
+        % Store projection matrix M for current camera into global struct
+        projection_mat_all{cam} = projection_mat;
         
         % Extract the x, y, and likelihood columns from the pose file
         % Assume the pose file has the following columns: scorer, bodyparts, coords (x, y, likelihood)
@@ -89,17 +93,14 @@ function points = weighted_least_squares_triangulation(trialDir)
         num_bodyparts = length(x_cols);
 
         % Create matrix points and likelihoods for current camera
-        trajectories_all{i} = zeros(num_frames, num_bodyparts, 2);
-        likelihoods_all{i} = zeros(num_frames, num_bodyparts);
+        trajectories_all{cam} = zeros(num_frames, num_bodyparts, 2);
+        likelihoods_all{cam} = zeros(num_frames, num_bodyparts);
 
         % Fill the trajectories and likelihoods matrices
-        trajectories_all{i}(:, :, 1) = pose(:, x_cols);
-        trajectories_all{i}(:, :, 2) = pose(:, y_cols);
-        likelihoods_all{i} = pose(:, likelihood_cols);
+        trajectories_all{cam}(:, :, 1) = pose(:, x_cols);
+        trajectories_all{cam}(:, :, 2) = pose(:, y_cols);
+        likelihoods_all{cam} = pose(:, likelihood_cols);
     end
-
-    % Initialize the points matrix
-    points = zeros(num_frames, num_bodyparts, 3);
 
     % LOOP DESCRIPTION
     % % The WLS estimation is split into chunks for memory.
@@ -111,8 +112,11 @@ function points = weighted_least_squares_triangulation(trialDir)
 
     % Set global index to split computation
     index_in_chunk = 1;
-    chunk_size = 10000;
+    chunk_size = 10000;  
     b = [];
+
+    % Initialize the points matrix
+    points = zeros(num_frames, num_bodyparts, 3);
     
     for bodypart = 1:num_bodyparts
         % Initialize matrices for WLS equation for chunks
@@ -135,27 +139,26 @@ function points = weighted_least_squares_triangulation(trialDir)
         % x/y (1/2)
         for frame = 1:num_frames
             for cam = 1:numCams
-                % TODO: Replace with projection_mat =
-                % projection_mat_all{cam};
-                % % Access basis vectors for current camera
-                % basis_vectors = basis_vectors_all{cam};
+                % Access projection mat M for current camera
+                projection_mat = projection_mat_all{cam};
     
                 % Access likelihoods for current camera
                 likelihoods = likelihoods_all{cam};
-    
+
+                % Access x and y coordinates for current frame, cam, bp
                 x_point = trajectories_all{cam}(frame, bodypart, 1);
                 y_point = trajectories_all{cam}(frame, bodypart, 2);
     
+                % Access likelihood for current frame, cam, bodypart
                 likelihood = likelihoods(frame, bodypart);
     
-                % TODO: X = blkdiag(X, projection_mat);
-                % % Add basis vectors to X
-                % X = [X; basis_vectors];
+                % Add projection matrix for current camera to diagonal of X
+                X = blkdiag(X, projection_mat);
     
-                % Add likelihoods to W
+                % Add likelihood twice to diagonal of W
                 W = blkdiag(W, likelihood * eye(2));
     
-                % Add observations to y
+                % Add current point column-wise to Y
                 y = [y; x_point; y_point];
             end
             
@@ -181,13 +184,13 @@ function points = weighted_least_squares_triangulation(trialDir)
         if ~isempty(X)
             b_chunk = (X' * W * X) \ (X' * W * y);
             b = [b; b_chunk];
+            % Clear memory for matrices
+            clear X W y
         end
     end
-
+    
     disp(b);
 
-    % TODO: store b in points
-    
     % Display the results
     disp('3D Points:');
     disp(points);
