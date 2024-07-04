@@ -4,6 +4,22 @@ use indicatif::{ProgressBar, ProgressStyle};
 use std::error::Error;
 use std::fs::File;
 
+
+/// Reads keypoints from a CSV file and returns them as a vector of vectors of f64.
+///
+/// # Arguments
+///
+/// * `file_path` - A string slice that holds the path to the keypoints CSV file.
+///
+/// # Returns
+///
+/// A `Result` which is:
+/// - `Ok`: Contains a vector of vectors of f64, representing the keypoints.
+/// - `Err`: Contains an error if reading or parsing the file fails.
+///
+/// # Errors
+///
+/// This function will return an error if the file cannot be read or if parsing fails.
 fn read_keypoints(file_path: &str) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
     let mut rdr = ReaderBuilder::new().has_headers(false).from_path(file_path)?;
     let mut keypoints = Vec::new();
@@ -20,6 +36,21 @@ fn read_keypoints(file_path: &str) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
     Ok(keypoints)
 }
 
+/// Reads pose data from a CSV file and returns it as a matrix of f64.
+///
+/// # Arguments
+///
+/// * `file_path` - A string slice that holds the path to the pose CSV file.
+///
+/// # Returns
+///
+/// A `Result` which is:
+/// - `Ok`: Contains a DMatrix of f64, representing the pose data.
+/// - `Err`: Contains an error if reading or parsing the file fails.
+///
+/// # Errors
+///
+/// This function will return an error if the file cannot be read or if parsing fails.
 fn read_pose(file_path: &str) -> Result<DMatrix<f64>, Box<dyn Error>> {
     let mut rdr = ReaderBuilder::new().has_headers(false).from_path(file_path)?;
     let mut data = Vec::new();
@@ -35,6 +66,24 @@ fn read_pose(file_path: &str) -> Result<DMatrix<f64>, Box<dyn Error>> {
     Ok(DMatrix::from_vec(num_rows, 3, data))
 }
 
+/// Performs weighted least squares triangulation on pose data from multiple cameras.
+///
+/// This function reads keypoints and pose data from CSV files in a given trial directory,
+/// computes projection matrices for each camera, and estimates 3D points using weighted least squares.
+///
+/// # Arguments
+///
+/// * `trial_dir` - A string slice that holds the path to the trial directory.
+///
+/// # Returns
+///
+/// A `Result` which is:
+/// - `Ok`: If the triangulation completes successfully.
+/// - `Err`: Contains an error if any step of the process fails.
+///
+/// # Errors
+///
+/// This function will return an error if reading any file or parsing data fails.
 fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn Error>> {
     let mut projection_mats = Vec::new();
     let mut trajectories = Vec::new();
@@ -102,8 +151,7 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
     let total_steps = num_bodyparts * num_frames;
     let pb = ProgressBar::new(total_steps as u64);
     pb.set_style(ProgressStyle::default_bar()
-        .template("{msg} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})")
-        .progress_chars("#>-"));
+        .template("{msg} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})")?);
     
     let mut index_in_chunk = 1;
     let chunk_size = 10000;
@@ -135,10 +183,12 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                     new_w_block[(r - w_mat.nrows(), c - w_mat.ncols())]
                 });
                 
-                y_vec = DVector::from_fn(y_vec.len() + 2, |i| if i < y_vec.len() {
-                    y_vec[i]
-                } else {
-                    if i == y_vec.len() { x_point } else { y_point }
+                y_vec = DVector::from_fn(y_vec.len() + 2, |i, _| {
+                    if i < y_vec.len() {
+                        y_vec[i]
+                    } else {
+                        if i == y_vec.len() { x_point } else { y_point }
+                    }
                 });
             }
             
@@ -160,8 +210,9 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
         
         if x_mat.nrows() > 0 {
             let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
+            let frame_offset = num_frames - (x_mat.nrows() / 2); // Calculate the frame offset for the remaining rows
             for (i, val) in b_chunk.iter().enumerate() {
-                points[frame][bodypart][i] = *val;
+                points[frame_offset + i][bodypart][i] = *val;
             }
         }
     }
