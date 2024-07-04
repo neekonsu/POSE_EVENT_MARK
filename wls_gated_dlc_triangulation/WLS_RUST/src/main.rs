@@ -2,8 +2,7 @@ use nalgebra::{DMatrix, DVector};
 use csv::ReaderBuilder;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::error::Error;
-use std::fs::File;
-
+use std::io::{self, Write};
 
 /// Reads keypoints from a CSV file and returns them as a vector of vectors of f64.
 ///
@@ -97,7 +96,7 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
         let entry = entry?;
         if entry.file_type()?.is_dir() {
             let cam_folder_path = entry.path();
-            let cam_folder_name = cam_folder_path.file_name().unwrap().to_str().unwrap();
+            // let cam_folder_name = cam_folder_path.file_name().unwrap().to_str().unwrap(); TODO: FIGURE OUT IF NEEDED
             let keypoints_path = cam_folder_path.join("keypoints.csv");
             let keypoints = read_keypoints(keypoints_path.to_str().unwrap())?;
             
@@ -158,31 +157,44 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
     let mut points = vec![vec![[0.0; 3]; num_bodyparts]; num_frames];
     
     for bodypart in 0..num_bodyparts {
-        let mut x_mat = DMatrix::<f64>::zeros(0, 3);
+        // Initialize matrices and vector for weighted least squares computation
+        let mut x_mat = DMatrix::<f64>::zeros(0, 0);
         let mut w_mat = DMatrix::<f64>::zeros(0, 0);
         let mut y_vec = DVector::<f64>::zeros(0);
         
         for frame in 0..num_frames {
             for cam in 0..projection_mats.len() {
+                // Get the projection matrix for the current camera
                 let projection_mat = &projection_mats[cam];
+
+                // Get the x and y coordinates of the current body part in the current frame for the current camera
                 let x_point = trajectories[cam][frame][bodypart][0];
                 let y_point = trajectories[cam][frame][bodypart][1];
+
+                // Get the likelihood of the current body part in the current frame for the current camera
                 let likelihood = likelihoods[cam][frame][bodypart];
                 
-                x_mat = DMatrix::from_fn(x_mat.nrows() + 2, 3, |r, c| if r < x_mat.nrows() {
-                    x_mat[(r, c)]
-                } else {
-                    projection_mat[(r - x_mat.nrows(), c)]
-                });
+                // Update x_mat to include the new projection matrix rows
+                let new_x_rows = x_mat.nrows() + projection_mat.nrows();
+                let new_x_cols = x_mat.ncols() + projection_mat.ncols();
+                let mut new_x_mat = DMatrix::<f64>::zeros(new_x_rows, new_x_cols);
                 
-                let eye2 = DMatrix::<f64>::identity(2, 2);
-                let new_w_block = eye2 * likelihood;
-                w_mat = DMatrix::from_fn(w_mat.nrows() + 2, w_mat.ncols() + 2, |r, c| if r < w_mat.nrows() && c < w_mat.ncols() {
-                    w_mat[(r, c)]
-                } else {
-                    new_w_block[(r - w_mat.nrows(), c - w_mat.ncols())]
-                });
+                // Update x_mat to include the new projection matrix in the diagonal
+                new_x_mat.view_mut((0, 0), (x_mat.nrows(), x_mat.ncols())).copy_from(&x_mat);
+                new_x_mat.view_mut((x_mat.nrows(), x_mat.ncols()), (projection_mat.nrows(), projection_mat.ncols())).copy_from(&projection_mat); // TODO: check this line in case X is incorrectly constructed
+                x_mat = new_x_mat;
                 
+                // Update w_mat to include the new likelihood weights
+                let eye2 = DMatrix::<f64>::identity(2, 2) * likelihood;
+                let new_w_rows = w_mat.nrows() + eye2.nrows();
+                let new_w_cols = w_mat.ncols() + eye2.ncols();
+                let mut new_w_mat = DMatrix::<f64>::zeros(new_w_rows, new_w_cols);
+
+                new_w_mat.view_mut((0, 0), (w_mat.nrows(), w_mat.ncols())).copy_from(&w_mat);
+                new_w_mat.view_mut((w_mat.nrows(), w_mat.ncols()), (eye2.nrows(), eye2.ncols())).copy_from(&eye2); // TODO: check this line in case X is incorrectly constructed
+                w_mat = new_w_mat;
+                
+                // Update y_vec to include the new 2D points
                 y_vec = DVector::from_fn(y_vec.len() + 2, |i, _| {
                     if i < y_vec.len() {
                         y_vec[i]
@@ -192,27 +204,33 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                 });
             }
             
-            index_in_chunk += 1;
-            
-            if index_in_chunk > chunk_size {
+            // If the chunk size is reached, solve for the 3D points
+            if index_in_chunk == chunk_size {
                 let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
+                // Store the 3D coordinates in the points matrix
                 for (i, val) in b_chunk.iter().enumerate() {
                     points[frame][bodypart][i] = *val;
                 }
-                x_mat = DMatrix::<f64>::zeros(0, 3);
+                // Reset matrices and vector for the next chunk
+                x_mat = DMatrix::<f64>::zeros(0, 0);
                 w_mat = DMatrix::<f64>::zeros(0, 0);
                 y_vec = DVector::<f64>::zeros(0);
                 index_in_chunk = 1;
             }
             
+            // Increment the chunk index
+            index_in_chunk += 1;
+
+            // Update the progress bar
             pb.inc(1);
         }
         
+        // Handle any remaining data for the current body part after the loop
         if x_mat.nrows() > 0 {
             let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
             let frame_offset = num_frames - (x_mat.nrows() / 2); // Calculate the frame offset for the remaining rows
             for (i, val) in b_chunk.iter().enumerate() {
-                points[frame_offset + i][bodypart][i] = *val;
+                points[frame_offset][bodypart][i] = *val;
             }
         }
     }
@@ -223,8 +241,27 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
 }
 
 fn main() {
-    let trial_dir: &str = "../SANDBOX_videos/videos/Natalya_20200723_ARM_001";
+    // Hardcode default path used for testing with Sandbox data
+    let default_path = "../../../SANDBOX_videos/Natalya_20200723_ARM_001";
+    // Prompt user for path in terminal
+    print!("Enter the path to the trial directory (or press Enter to use the default path): ");
+    io::stdout().flush().unwrap(); // Ensure the prompt is shown before user input
+
+    // Read input from user after displaying prompt string
+    let mut input_path = String::new();
+    io::stdin().read_line(&mut input_path).expect("Failed to read input");
+    let input_path = input_path.trim(); // Remove any trailing newline or whitespace
+    
+    // Handle default vs. user-selected behavior
+    let trial_dir = if input_path.is_empty() {
+        default_path
+    } else {
+        input_path
+    };
+
+    // Handle errors propagated from weighted_least_squares_triangulation(*)
     if let Err(e) = weighted_least_squares_triangulation(trial_dir) {
         eprintln!("Error: {}", e);
     }
+
 }
