@@ -15,10 +15,6 @@ function points = weighted_least_squares_triangulation(trialDir)
     trajectories_all = cell(numCams, 1);
     likelihoods_all = cell(numCams, 1);
     
-    % Preallocate trajectory and likelihood matrices assuming uniformity across cameras
-    % This will be determined during the first iteration
-    firstCameraProcessed = false;
-
     % Iterate over each camera directory
     for i = 1:numCams
         % Store Camera Folder
@@ -62,12 +58,25 @@ function points = weighted_least_squares_triangulation(trialDir)
         P_i = [keypoints{3, 2}; keypoints{3, 3}];
         P_j = [keypoints{4, 2}; keypoints{4, 3}];
         P_k = [keypoints{5, 2}; keypoints{5, 3}];
-        
-        % Stack the projections into a single column vector
-        projections = [P_i; P_j; P_k];
-        
+
         % Stack the basis vectors into a matrix
         basis_vectors = [i_vector; j_vector; k_vector];
+        
+        % Given:
+        % M: Projection matrix for camera
+        % e: basis 3D column vector scaled by measured distance di
+        % P: point 2D column vector of e projected into camera perspective
+        % Then we solve:
+        % [m11*d1;m12*d1;m21*d2;m22*d2;m13*d3;m23*d3]=[P_i;P_j;P_k];
+        % To find mij for the 2x3 matrix M corresponding to the current
+        % camera
+        % TODO: REPLACE WITH CORRECT ESTIMATION OF projection_mat for
+        % current camera:
+        % % Stack the projections into a single column vector
+        % projections = [P_i; P_j; P_k];
+        % % Store the basis vectors and projections for this camera
+        % basis_vectors_all{i} = basis_vectors;
+        % projections_all{i} = projections;
         
         % Extract the x, y, and likelihood columns from the pose file
         % Assume the pose file has the following columns: scorer, bodyparts, coords (x, y, likelihood)
@@ -77,61 +86,105 @@ function points = weighted_least_squares_triangulation(trialDir)
         
         % Store number of frames & bodyparts for current camera's pose data
         num_frames = size(pose, 1);
-        num_points = length(x_cols);
+        num_bodyparts = length(x_cols);
 
         % Create matrix points and likelihoods for current camera
-        trajectories_all{i} = zeros(num_frames, num_points, 2);
-        likelihoods_all{i} = zeros(num_frames, num_points);
+        trajectories_all{i} = zeros(num_frames, num_bodyparts, 2);
+        likelihoods_all{i} = zeros(num_frames, num_bodyparts);
 
         % Fill the trajectories and likelihoods matrices
         trajectories_all{i}(:, :, 1) = pose(:, x_cols);
         trajectories_all{i}(:, :, 2) = pose(:, y_cols);
         likelihoods_all{i} = pose(:, likelihood_cols);
-        
-        % Store the basis vectors and projections for this camera
-        basis_vectors_all{i} = basis_vectors;
-        projections_all{i} = projections;
     end
 
     % Initialize the points matrix
-    points = zeros(num_frames, num_points, 3);
+    points = zeros(num_frames, num_bodyparts, 3);
 
-    % Iterate over each frame and each point
-    for frame = 1:num_frames
-        for point = 1:num_points
-            % Initialize matrices X, W, and vector y
-            X = [];
-            W = [];
-            y = [];
-            
-            % Construct X, W, and y for all cameras
-            for i = 1:numCams
+    % LOOP DESCRIPTION
+    % % The WLS estimation is split into chunks for memory.
+    % % The loop estimates in chunks of 10,000 samples per bodypart
+    % % Typical Computation:
+    % % % ~3 chunks per bodypart
+    % % % ~7 bodyparts
+    % % % Total: 21 block computations to populate `b`
 
-                basis_vectors = basis_vectors_all{i};
-                likelihoods = likelihoods_all{i};
+    % Set global index to split computation
+    index_in_chunk = 1;
+    chunk_size = 10000;
+    b = [];
+    
+    for bodypart = 1:num_bodyparts
+        % Initialize matrices for WLS equation for chunks
+        X = [];
+        W = [];
+        y = [];
+        
+        % DESCRIPTION OF OPERATION:
+        % For each frame, iterating each camera:
+        % X: for the given frame and cam, add corresponding M to diagonal
+        % of X.
+        % W: For given frame and cam, add likelihood twice to diagonal of W
+        % for x and y coordinates.
+        % Y: For given frame and cam, append 2D point to column vector
 
-                x_point = trajectories_all{i}(frame, point, 1);
-                y_point = trajectories_all{i}(frame, point, 2);
-
-                likelihood = likelihoods(frame, point);
-                
-                % Add basis vectors to X
-                X = [X; basis_vectors];
-                
+        % DESCRIPTION OF VARIABLES:
+        % projections_all{i}: M proj mat corresponding to cam i
+        % likelihoods
+        for frame = 1:num_frames
+            for cam = 1:numCams
+                % TODO: Replace with projection_mat =
+                % projection_mat_all{cam};
+                % % Access basis vectors for current camera
+                % basis_vectors = basis_vectors_all{cam};
+    
+                % Access likelihoods for current camera
+                likelihoods = likelihoods_all{cam};
+    
+                x_point = trajectories_all{cam}(frame, bodypart, 1);
+                y_point = trajectories_all{cam}(frame, bodypart, 2);
+    
+                likelihood = likelihoods(frame, bodypart);
+    
+                % TODO: X = blkdiag(X, projection_mat);
+                % % Add basis vectors to X
+                % X = [X; basis_vectors];
+    
                 % Add likelihoods to W
                 W = blkdiag(W, likelihood * eye(2));
-                
+    
                 % Add observations to y
                 y = [y; x_point; y_point];
             end
             
-            % Solve for the 3D point using weighted least squares
-            b = (X' * W * X) \ (X' * W * y);
+            index_in_chunk = index_in_chunk + 1;
             
-            % Store the 3D coordinates
-            points(frame, point, :) = b;
+            % Check if we have reached the chunk size
+            if index_in_chunk > chunk_size
+                % Solve for the 3D point using weighted least squares for the chunk
+                b_chunk = (X' * W * X) \ (X' * W * y);
+                
+                % Store the 3D coordinates
+                b = [b; b_chunk];
+                
+                % Reset the matrices for the next chunk
+                X = [];
+                W = [];
+                y = [];
+                index_in_chunk = 1;
+            end
+        end
+        
+        % Solve for the remaining points if any
+        if ~isempty(X)
+            b_chunk = (X' * W * X) \ (X' * W * y);
+            b = [b; b_chunk];
         end
     end
+
+    disp(b);
+
+    % TODO: store b in points
     
     % Display the results
     disp('3D Points:');
