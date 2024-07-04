@@ -102,14 +102,6 @@ function points = weighted_least_squares_triangulation(trialDir)
         likelihoods_all{cam} = pose(:, likelihood_cols);
     end
 
-    % LOOP DESCRIPTION
-    % % The WLS estimation is split into chunks for memory.
-    % % The loop estimates in chunks of 10,000 samples per bodypart
-    % % Typical Computation:
-    % % % ~3 chunks per bodypart
-    % % % ~7 bodyparts
-    % % % Total: 21 block computations to populate `b`
-
     % Set global index to split computation
     index_in_chunk = 1;
     chunk_size = 10000;  
@@ -117,6 +109,12 @@ function points = weighted_least_squares_triangulation(trialDir)
 
     % Initialize the points matrix
     points = zeros(num_frames, num_bodyparts, 3);
+
+    % Initialize the progress bar
+    total_steps = num_bodyparts * num_frames;
+    completed_steps = 0;
+    waitbar_handle = waitbar(0, 'Processing...', 'Name', 'Weighted Least Squares Triangulation');
+    tic; % Start timer
     
     for bodypart = 1:num_bodyparts
         % Initialize matrices for WLS equation for chunks
@@ -124,19 +122,6 @@ function points = weighted_least_squares_triangulation(trialDir)
         W = [];
         y = [];
         
-        % DESCRIPTION OF OPERATION:
-        % For each frame, iterating each camera:
-        % X: for the given frame and cam, add corresponding M to diagonal
-        % of X.
-        % W: For given frame and cam, add likelihood twice to diagonal of W
-        % for x and y coordinates.
-        % Y: For given frame and cam, append 2D point to column vector
-
-        % DESCRIPTION OF VARIABLES:
-        % projections_all{i}: M proj mat corresponding to cam i
-        % likelihoods_all{cam}: all bodyparts and frames for cam i
-        % trajectories_all{cam}: access 2D points by cam, frame, bp, and
-        % x/y (1/2)
         for frame = 1:num_frames
             for cam = 1:numCams
                 % Access projection mat M for current camera
@@ -163,6 +148,11 @@ function points = weighted_least_squares_triangulation(trialDir)
             end
             
             index_in_chunk = index_in_chunk + 1;
+            completed_steps = completed_steps + 1;
+            
+            % Update progress bar
+            waitbar(completed_steps / total_steps, waitbar_handle, ...
+                sprintf('Processing... %3.1f%% complete', completed_steps / total_steps * 100));
             
             % Check if we have reached the chunk size
             if index_in_chunk > chunk_size
@@ -188,6 +178,8 @@ function points = weighted_least_squares_triangulation(trialDir)
             clear X W y
         end
     end
+    
+    close(waitbar_handle); % Close the progress bar
     
     disp(b);
 
