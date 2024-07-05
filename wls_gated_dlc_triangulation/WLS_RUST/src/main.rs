@@ -246,7 +246,9 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
         for frame in 0..num_frames {
             for cam in 0..projection_mats.len() {
                 // Get the projection matrix for the current camera
-                let projection_mat = &projection_mats[cam];
+                /* // TODO: replace projection_mats with struct that stores a vector of references for each camera, with each reference pointing to the correct projection for that frame.
+                Reasoning: minimum viable copies of the projection matrices will be stored in memory, while access is reasonably fast with depth of 2. */
+                let projection_mat = &projection_mats[cam]; 
 
                 // Get the x and y coordinates of the current body part in the current frame for the current camera
                 let x_point = trajectories[cam][frame][bodypart][0];
@@ -261,11 +263,13 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                 let mut new_x_mat = DMatrix::<f64>::zeros(new_x_rows, new_x_cols);
                 
                 // Update x_mat to include the new projection matrix in the diagonal
+                /* TODO: Stack proejction matrix to bottom of matrix. */
                 new_x_mat.view_mut((0, 0), (x_mat.nrows(), x_mat.ncols())).copy_from(&x_mat);
                 new_x_mat.view_mut((x_mat.nrows(), x_mat.ncols()), (projection_mat.nrows(), projection_mat.ncols())).copy_from(&projection_mat); // TODO: check this line in case X is incorrectly constructed
                 x_mat = new_x_mat;
                 
                 // Update w_mat to include the new likelihood weights
+                /* TODO: prune old logic for growing W, now that we have (2*num_cams)x(2*num_cams) for single point estimate. */
                 let eye2 = DMatrix::<f64>::identity(2, 2) * likelihood;
                 let new_w_rows = w_mat.nrows() + eye2.nrows();
                 let new_w_cols = w_mat.ncols() + eye2.ncols();
@@ -285,6 +289,7 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                 });
             }
             
+            /* TODO: Get rid of chunk_size mentions for now => simplest implementation of single-point iterative estimates before experimenting with speed of larger operations. */
             if index_in_chunk == chunk_size {
                 let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone(); // .try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
                 // Store the 3D coordinates in the points matrix
@@ -305,6 +310,7 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
             pb.inc(1);
         }
         
+        /* TODO: Get rid of edge case that data remains, since single-point iterative estimate eliminates this possibility in the absence of fixed chunks. */
         // Handle any remaining data for the current body part after the loop
         if x_mat.nrows() > 0 {
             let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
