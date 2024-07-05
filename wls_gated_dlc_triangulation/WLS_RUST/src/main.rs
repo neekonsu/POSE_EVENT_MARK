@@ -1,8 +1,47 @@
 use nalgebra::{DMatrix, DVector};
 use csv::ReaderBuilder;
 use indicatif::{ProgressBar, ProgressStyle};
-use std::error::Error;
-use std::io::{self, Write};
+use regex::Regex;
+use std::{error::Error, fs::{self, File}, io::{BufRead, BufReader}, path::{Path, PathBuf}};
+use rfd::FileDialog;
+
+fn find_csv_file(cam_folder_path: &Path) -> Result<PathBuf, Box<dyn Error>> {
+    // Extract the trial name and camera number from the folder path
+    let trial_name = cam_folder_path
+        .parent()
+        .and_then(|p| p.file_name())
+        .and_then(|n| n.to_str())
+        .ok_or("Unable to extract trial name")?;
+
+    let cam_folder_name = cam_folder_path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .ok_or("Unable to extract camera folder name")?;
+
+    let cam_num = Regex::new(r"\d+")
+        .unwrap()
+        .find(cam_folder_name)
+        .ok_or("Unable to extract camera number")?
+        .as_str();
+
+    // Construct the regex pattern
+    let pattern = format!(r"^{}-{}.*\.csv$", trial_name, cam_num);
+    let regex = Regex::new(&pattern)?;
+
+    // Search for matching CSV file
+    for entry in fs::read_dir(cam_folder_path)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_file() {
+            if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
+                if regex.is_match(file_name) {
+                    return Ok(path);
+                }
+            }
+        }
+    }
+    Err(From::from("CSV file not found"))
+}
 
 /// Reads keypoints from a CSV file and returns them as a vector of vectors of f64.
 ///
@@ -20,13 +59,13 @@ use std::io::{self, Write};
 ///
 /// This function will return an error if the file cannot be read or if parsing fails.
 fn read_keypoints(file_path: &str) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
-    let mut rdr = ReaderBuilder::new().has_headers(false).from_path(file_path)?;
+    let mut rdr = ReaderBuilder::new().has_headers(true).from_path(file_path)?;
     let mut keypoints = Vec::new();
-    
+
     for result in rdr.records() {
         let record = result?;
         let mut row = Vec::new();
-        for field in record.iter() {
+        for field in record.iter().skip(1) {
             row.push(field.parse()?);
         }
         keypoints.push(row);
@@ -51,18 +90,36 @@ fn read_keypoints(file_path: &str) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
 ///
 /// This function will return an error if the file cannot be read or if parsing fails.
 fn read_pose(file_path: &str) -> Result<DMatrix<f64>, Box<dyn Error>> {
-    let mut rdr = ReaderBuilder::new().has_headers(false).from_path(file_path)?;
+    let file = File::open(file_path)?;
+    let reader = BufReader::new(file);
+    let mut lines = reader.lines();
+
+    // Skip the first three header lines
+    for _ in 0..4 {
+        lines.next();
+    }
+
     let mut data = Vec::new();
-    
-    for result in rdr.records() {
-        let record = result?;
-        for field in record.iter() {
-            data.push(field.parse()?);
+
+    let mut num_cols: usize = 0;
+    for line in lines {
+        let line = line?;
+        let fields: Vec<&str> = line.split(',').collect();
+        num_cols = fields.len();
+
+        for field in fields {
+            // Try to parse the field as f64 and push it into the data vector
+            match field.parse::<f64>() {
+                Ok(value) => data.push(value),
+                Err(e) => return Err(Box::new(e)),
+            }
         }
     }
     
-    let num_rows = data.len() / 3;
-    Ok(DMatrix::from_vec(num_rows, 3, data))
+    // Determine the number of rows
+    let num_rows = data.len() / num_cols;
+
+    Ok(DMatrix::from_vec(num_rows, num_cols, data))
 }
 
 /// Performs weighted least squares triangulation on pose data from multiple cameras.
@@ -100,13 +157,13 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
             let keypoints_path = cam_folder_path.join("keypoints.csv");
             let keypoints = read_keypoints(keypoints_path.to_str().unwrap())?;
             
-            let d1 = keypoints[2][4];
-            let d2 = keypoints[3][4];
-            let d3 = keypoints[4][4];
+            let d1 = keypoints[1][3];
+            let d2 = keypoints[2][3];
+            let d3 = keypoints[3][3];
             
-            let p_i = DVector::from_vec(vec![keypoints[2][1], keypoints[2][2]]);
-            let p_j = DVector::from_vec(vec![keypoints[3][1], keypoints[3][2]]);
-            let p_k = DVector::from_vec(vec![keypoints[4][1], keypoints[4][2]]);
+            let p_i = DVector::from_vec(vec![keypoints[1][0], keypoints[1][1]]);
+            let p_j = DVector::from_vec(vec![keypoints[2][0], keypoints[2][1]]);
+            let p_k = DVector::from_vec(vec![keypoints[3][0], keypoints[3][1]]);
             
             let d_matrix = DMatrix::from_row_slice(6, 6, &[
                 d1, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -123,7 +180,7 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
             projection_mats.push(projection_mat);
             
             // Read pose data
-            let pose_path = cam_folder_path.join("pose.csv");  // Assuming pose data in pose.csv
+            let pose_path = find_csv_file(&cam_folder_path).unwrap();
             let pose = read_pose(pose_path.to_str().unwrap())?;
             num_frames = pose.nrows();
             num_bodyparts = pose.ncols() / 3;
@@ -243,24 +300,24 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
 fn main() {
     // Hardcode default path used for testing with Sandbox data
     let default_path = "../../../SANDBOX_videos/Natalya_20200723_ARM_001";
-    // Prompt user for path in terminal
-    print!("Enter the path to the trial directory (or press Enter to use the default path): ");
-    io::stdout().flush().unwrap(); // Ensure the prompt is shown before user input
-
-    // Read input from user after displaying prompt string
-    let mut input_path = String::new();
-    io::stdin().read_line(&mut input_path).expect("Failed to read input");
-    let input_path = input_path.trim(); // Remove any trailing newline or whitespace
     
-    // Handle default vs. user-selected behavior
-    let trial_dir = if input_path.is_empty() {
-        default_path
-    } else {
-        input_path
+    // Instantiate FileDialog
+    let dialog: FileDialog = FileDialog::new();
+
+    // Use match statement to assign to final path
+    let trial_dir: String = match dialog.pick_folder() {
+        Some(input_path) => {
+            println!("Selected directory: {:?}", input_path);
+            input_path.to_string_lossy().into_owned()
+        },
+        None => {
+            println!("No directory selected");
+            default_path.to_string()
+        },
     };
 
     // Handle errors propagated from weighted_least_squares_triangulation(*)
-    if let Err(e) = weighted_least_squares_triangulation(trial_dir) {
+    if let Err(e) = weighted_least_squares_triangulation(&trial_dir) {
         eprintln!("Error: {}", e);
     }
 
