@@ -210,7 +210,7 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
         .template("{msg} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})")?);
     
     let mut index_in_chunk = 1;
-    let chunk_size = 10000;
+    let chunk_size = 100;
     let mut points = vec![vec![[0.0; 3]; num_bodyparts]; num_frames];
     
     for bodypart in 0..num_bodyparts {
@@ -261,9 +261,13 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                 });
             }
             
+            // DEBUG LINALG
+            // Currently, the math below incorrectly generates b_chunk as a square matrix. 
+            // It is unclear why, for a 100 point => 200 2D coordinate => 300 3D coordinate operation, it should generate a 
+            // 600x600 matrix as the result. Once this is resolved, the program should run normally.
             // If the chunk size is reached, solve for the 3D points
             if index_in_chunk == chunk_size {
-                let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
+                let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone(); // .try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
                 // Store the 3D coordinates in the points matrix
                 for (i, val) in b_chunk.iter().enumerate() {
                     points[frame][bodypart][i] = *val;
