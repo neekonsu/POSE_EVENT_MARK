@@ -209,8 +209,7 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
     pb.set_style(ProgressStyle::default_bar()
         .template("{msg} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})")?);
     
-    let mut index_in_chunk = 1;
-    let chunk_size = 100;
+    /* CHANGE: REMOVED INDEX IN CHUNK LOGIC */
     let mut points = vec![vec![[0.0; 3]; num_bodyparts]; num_frames];
     
     /*  BEGINNING REVISION OF LINALG 
@@ -258,14 +257,15 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                 let likelihood = likelihoods[cam][frame][bodypart];
                 
                 // Update x_mat to include the new projection matrix rows
-                let new_x_rows = x_mat.nrows() + projection_mat.nrows();
-                let new_x_cols = x_mat.ncols() + projection_mat.ncols();
-                let mut new_x_mat = DMatrix::<f64>::zeros(new_x_rows, new_x_cols);
+                /* CHANGE: HARCODED DIMENSIONS SINCE KNOWN; ACCESS OLD MAT DIMS FIRST TO MINIMIZE REPEATED nrow()/ncols() CALLS */
+                let x_rows = x_mat.nrows();
+                let x_cols = 3;
+                let mut new_x_mat = DMatrix::<f64>::zeros(x_rows+2, x_cols);
                 
                 // Update x_mat to include the new projection matrix in the diagonal
-                /* TODO: Stack proejction matrix to bottom of matrix. */
-                new_x_mat.view_mut((0, 0), (x_mat.nrows(), x_mat.ncols())).copy_from(&x_mat);
-                new_x_mat.view_mut((x_mat.nrows(), x_mat.ncols()), (projection_mat.nrows(), projection_mat.ncols())).copy_from(&projection_mat); // TODO: check this line in case X is incorrectly constructed
+                /* CHANGE: HARDCODE CURRENT X-DIMENSIONS;  COPY PROJECTION MAT TO BOTTOM OF MATRIX */
+                new_x_mat.view_mut((0, 0), (x_rows, x_cols)).copy_from(&x_mat);
+                new_x_mat.view_mut((x_rows+1, 0), (2, 3)).copy_from(&projection_mat); // TODO: CHECK `x_rows+1` IS CORRECT INDEX
                 x_mat = new_x_mat;
                 
                 // Update w_mat to include the new likelihood weights
@@ -288,25 +288,22 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                     }
                 });
             }
+
+            let b = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone(); // .try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
             
-            /* TODO: Get rid of chunk_size mentions for now => simplest implementation of single-point iterative estimates before experimenting with speed of larger operations. */
-            if index_in_chunk == chunk_size {
-                let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone(); // .try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
-                // Store the 3D coordinates in the points matrix
-                for (i, val) in b_chunk.iter().enumerate() {
-                    points[frame][bodypart][i] = *val;
-                }
-                // Reset matrices and vector for the next chunk
-                x_mat = DMatrix::<f64>::zeros(0, 0);
-                w_mat = DMatrix::<f64>::zeros(0, 0);
-                y_vec = DVector::<f64>::zeros(0);
-                index_in_chunk = 1;
-            }
+            // Store the 3D coordinates in the points matrix
+            /* CHANGE: ENFORCE LOGIC FOR SINGLE POINT ITERATIVE ESTIMATE; REMOVED ITERATOR */
+            points[frame][bodypart][0] = b[0];
+            points[frame][bodypart][1] = b[1];
+            points[frame][bodypart][2] = b[2];
             
-            // Increment the chunk index
-            index_in_chunk += 1;
+            // Reset matrices and vector for the next chunk
+            x_mat = DMatrix::<f64>::zeros(0, 0);
+            w_mat = DMatrix::<f64>::zeros(0, 0);
+            y_vec = DVector::<f64>::zeros(0);
 
             // Update the progress bar
+            /* CHANGE: REMOVED INDEX_IN_CHUNK LOGIC */
             pb.inc(1);
         }
         
