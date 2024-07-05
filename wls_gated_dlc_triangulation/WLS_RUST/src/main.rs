@@ -213,6 +213,30 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
     let chunk_size = 100;
     let mut points = vec![vec![[0.0; 3]; num_bodyparts]; num_frames];
     
+    /*  BEGINNING REVISION OF LINALG 
+        The current contruction of the linear problem is incorrect.
+        Currently, the X matrix treats each projection as an independent fact;
+        this is inherent to the fact that projection matrices are added to the diagonal of X,
+        forcing independence between each 3D point stored by b.
+        The correct approach is the following:
+        For a given 3D point p, we stack projection mats M, of cameras which can see p, vertically.
+        The product of that point with the corresponding projection column yields the 2D points 
+        from the cameras that see p. 
+        These operations scale in size quickly, so we will make the initial implementation point-wise;
+        we will iteratively process each 3D point, constructing the matrices corresponding to the single WLS optimization.
+        Once this works, we can trivially change the bounds of our iteration to allow the X, W, and y matrices to grow before computing. 
+        Given the memory cost of larger operations and high clock speed of our CPU, in addition to the requirement to invert (X^T*W*X),
+        The inefficiency of large matrix inversions may be reason-enough to maintain the loop as a point-wise routine.
+        
+        FUTURE CHANGES
+        Due to an early miscommunication, we have been manually annotating the keypoints at the first frame of each camera's video and 
+        therefore assuming constant projection matrices (invariant transformation space)
+        In parallel with fixes to the WLS computation, we will retrain the DLC model to mark keypoints in all videos, thereby removing the need
+        for user input and introducing a closed-loop capability to ensuring the accuracy of projections through time.
+        The fact that there will be time-variant tranformation matrices is another cause to construct the WLS operation point-for-point,
+        as there will be a substantial increase in memory access and context-switching that will slow down large-matrix implementations.
+        In order to scale, we could read all projections into an access-optimized struct in memory, but this optimization would come later.
+    */
     for bodypart in 0..num_bodyparts {
         // Initialize matrices and vector for weighted least squares computation
         let mut x_mat = DMatrix::<f64>::zeros(0, 0);
@@ -261,11 +285,6 @@ fn weighted_least_squares_triangulation(trial_dir: &str) -> Result<(), Box<dyn E
                 });
             }
             
-            // DEBUG LINALG
-            // Currently, the math below incorrectly generates b_chunk as a square matrix. 
-            // It is unclear why, for a 100 point => 200 2D coordinate => 300 3D coordinate operation, it should generate a 
-            // 600x600 matrix as the result. Once this is resolved, the program should run normally.
-            // If the chunk size is reached, solve for the 3D points
             if index_in_chunk == chunk_size {
                 let b_chunk = (x_mat.transpose() * &w_mat * &x_mat).try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone(); // .try_inverse().unwrap() * x_mat.transpose() * &w_mat * y_vec.clone();
                 // Store the 3D coordinates in the points matrix
