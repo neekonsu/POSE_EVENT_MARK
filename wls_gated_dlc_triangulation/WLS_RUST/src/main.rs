@@ -58,6 +58,7 @@ fn find_csv_file(cam_folder_path: &Path) -> Result<PathBuf, Box<dyn Error>> {
 /// # Errors
 ///
 /// This function will return an error if the file cannot be read or if parsing fails.
+/// TODO: CHANGE TO READ PROJECTIONS, WHERE KEYPOINT POSITIONS STORED IN MULTIPLE TABLES OF SINGLE CSV FILE projections.csv
 fn read_keypoints(file_path: &str) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
     let mut rdr = ReaderBuilder::new().has_headers(true).from_path(file_path)?;
     let mut keypoints = Vec::new();
