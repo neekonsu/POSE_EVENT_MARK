@@ -1,0 +1,466 @@
+    # Project definitions (do not edit)
+Task: NATALYA_20200723
+scorer: Neekon Saadat
+date: Jul9
+multianimalproject: false
+identity:
+
+    # Project path (change when moving around)
+project_path: D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+  Saadat-2024-07-09
+
+    # Annotation data set configuration (and individual video cropping parameters)
+video_sets:
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_001-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_002-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_003-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_004-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_005-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_011-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_012-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_013-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_014-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_BC_015-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_006-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_007-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_008-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_009-8.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-1.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-2.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-3.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-4.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-5.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-6.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-7.avi
+  : crop: 0, 968, 0, 400
+  ? D:\Data\Neekon_S\git\POSE_EVENT_MARK\DeepLabCut Project\NATALYA_20200723-Neekon
+    Saadat-2024-07-09\videos\Natalya_20200723_ARM_PN_010-8.avi
+  : crop: 0, 968, 0, 400
+bodyparts:
+- thumb_tip
+- thumb_PIJ
+- thumb_knuckle
+- index_tip
+- index_DIJ
+- index_PIJ
+- index_knuckle
+- middle_tip
+- middle_DIJ
+- middle_PIJ
+- middle_knuckle
+- ring_tip
+- ring_DIJ
+- ring_PIJ
+- ring_knuckle
+- pinky_tip
+- pinky_DIJ
+- pinky_PIJ
+- pinky_knuckle
+- wrist
+- forearm
+- elbow
+- upper_arm
+- shoulder
+- keypoint0
+- keypoint1
+- keypoint2
+- keypoint3
+
+    # Fraction of video to start/stop when extracting frames for labeling/refinement
+start: 0
+stop: 1
+numframes2pick: 20
+
+    # Plotting configuration
+skeleton:
+- thumb_knuckle
+- thumb_tip
+- thumb_PIJ
+- index_tip
+- index_DIJ
+- index_PIJ
+- index_knuckle
+- middle_tip
+- middle_DIJ
+- middle_PIJ
+- middle_knuckle
+- ring_tip
+- ring_DIJ
+- ring_PIJ
+- ring_knuckle
+- pinky_tip
+- pinky_DIJ
+- pinky_PIJ
+- pinky_knuckle
+- wrist
+- forearm
+- elbow
+- upper_arm
+- shoulder
+- keypoint0
+- - keypoint1
+- - keypoint2
+- - keypoint3
+skeleton_color: black
+pcutoff: 0.6
+dotsize: 12
+alphavalue: 0.7
+colormap: rainbow
+
+    # Training,Evaluation and Analysis configuration
+TrainingFraction:
+- 0.95
+iteration: 0
+default_net_type: resnet_50
+default_augmenter: default
+snapshotindex: -1
+batch_size: 8
+
+    # Cropping Parameters (for analysis and outlier frame detection)
+cropping: false
+    #if cropping is true for analysis, then set the values here:
+x1: 0
+x2: 640
+y1: 277
+y2: 624
+
+    # Refinement configuration (parameters from annotation dataset configuration also relevant in this stage)
+corner2move2:
+- 50
+- 50
+move2corner: true
