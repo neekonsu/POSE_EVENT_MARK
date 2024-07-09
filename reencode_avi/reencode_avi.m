@@ -27,8 +27,8 @@ for k = 1:length(aviFiles)
     % Get the base filename without the extension
     [~, baseFilename, ~] = fileparts(aviFiles(k).name);
     
-    % Set the output filename
-    outputFile = fullfile(folder, [baseFilename, '_reencoded.avi']);
+    % Set the output filename with .mp4 extension
+    outputFile = fullfile(folder, [baseFilename, '_reencoded.mp4']);
     
     % Re-encode the video using ffmpeg
     command = sprintf('"%s" -i "%s" -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 192k "%s"', ...
