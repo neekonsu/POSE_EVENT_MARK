@@ -400,6 +400,10 @@ bodyparts:
 - keypoint1
 - keypoint2
 - keypoint3
+- keypoint4
+- keypoint5
+- keypoint6
+- keypoint7
 
     # Fraction of video to start/stop when extracting frames for labeling/refinement
 start: 0
@@ -409,24 +413,24 @@ numframes2pick: 20
     # Plotting configuration
 skeleton:
 - thumb_knuckle
-- thumb_tip
-- thumb_PIJ
-- index_tip
-- index_DIJ
-- index_PIJ
+- - thumb_PIJ
+- - thumb_tip
 - index_knuckle
-- middle_tip
-- middle_DIJ
-- middle_PIJ
+- - index_PIJ
+- - index_DIJ
+- - index_tip
 - middle_knuckle
-- ring_tip
-- ring_DIJ
-- ring_PIJ
+- - middle_PIJ
+- - middle_DIJ
+- - middle_tip
 - ring_knuckle
-- pinky_tip
-- pinky_DIJ
-- pinky_PIJ
+- - ring_PIJ
+- - ring_DIJ
+- - ring_tip
 - pinky_knuckle
+- - pinky_PIJ
+- - pinky_DIJ
+- - pinky_tip
 - wrist
 - forearm
 - elbow
@@ -436,6 +440,11 @@ skeleton:
 - - keypoint1
 - - keypoint2
 - - keypoint3
+- keypoint4
+- - keypoint5
+- - keypoint6
+- - keypoint7
+
 skeleton_color: black
 pcutoff: 0.6
 dotsize: 12
