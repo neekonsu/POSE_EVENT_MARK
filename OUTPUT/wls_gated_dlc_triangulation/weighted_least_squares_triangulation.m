@@ -96,7 +96,7 @@ function points = weighted_least_squares_triangulation(trialDir)
     end
 
     % Initialize the points matrix
-    points = zeros(num_frames, num_bodyparts, 3);
+    points = struct();
 
     % Initialize the progress bar
     total_steps = num_bodyparts * num_frames;
@@ -147,13 +147,25 @@ function points = weighted_least_squares_triangulation(trialDir)
                 sprintf('Processing... %3.1f%% complete', completed_steps / total_steps * 100));
         end
         
-        % Store the 3D coordinates for the current body part
-        points(:, bodypart, :) = b;
+        % Store the 3D coordinates for the current body part in the struct
+        bodypart_name = bodypart_names{bodypart};
+        points.(bodypart_name) = b;
     end
     
     close(waitbar_handle); % Close the progress bar
     
-    % Display the results
-    disp('3D Points:');
-    disp(points);
+    % Prompt the user to select a save directory
+    saveDir = uigetdir('', 'Select a directory to save the output');
+
+    addpath("../../INPUT/mat_struct_summary");
+
+    if saveDir ~= 0
+        % Save the struct as '{trialName}_TRJ.mat'
+        save(fullfile(saveDir, [trialName, '_TRJ.mat']), 'points');
+        
+        % Call the external function to print the struct summary
+        mat_struct_summary(fullfile(saveDir, [trialName, '_TRJ.mat']));
+    else
+        disp('User canceled the directory selection');
+    end
 end

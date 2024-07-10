@@ -1,45 +1,40 @@
-function mat_struct_summary()
-    % Select the .mat file using a file dialog
-    [filename, pathname] = uigetfile("*.mat", "Select a .mat file to view");
+function mat_struct_summary(filepath)
+    % Check if the file exists
+    if exist(filepath, 'file') ~= 2
+        disp('File does not exist');
+        return;
+    end
 
-    % Check if the user selected a file or canceled the dialog
-    if isequal(filename, 0) || isequal(pathname, 0)
-        disp('User canceled the file selection');
-    else
-        % Add the folder to the MATLAB path
-        addpath(pathname);
+    % Load the .mat file
+    data = load(filepath);
 
-        % Load the .mat file
-        data = load(fullfile(pathname, filename));
+    % Display variables in the .mat file
+    disp('Variables in the .mat file:');
+    whos('-file', filepath);
 
-        % Display variables in the .mat file
-        disp('Variables in the .mat file:');
-        whos('-file', fullfile(pathname, filename));
+    % Display the structure of the loaded data
+    disp('Structure of the loaded data:');
+    disp(data);
 
-        % Display the structure of the loaded data
-        disp('Structure of the loaded data:');
-        disp(data);
+    % Display field names of the struct
+    disp('Field names of the struct:');
+    disp(fieldnames(data));
 
-        % Display field names of the struct
-        disp('Field names of the struct:');
-        disp(fieldnames(data));
+    % Display a summary of the struct fields
+    disp('Summary of the struct fields:');
+    structfun(@(x) disp(x(1:min(5,end))), data, 'UniformOutput', false);
 
-        % Display a summary of the struct fields
-        disp('Summary of the struct fields:');
-        structfun(@(x) disp(x(1:min(5,end))), data, 'UniformOutput', false);
-
-        % Additional display of array or large fields within the struct
-        fields = fieldnames(data);
-        for i = 1:numel(fields)
-            fieldValue = data.(fields{i});
-            if isstruct(fieldValue)
-                disp(['| — ', fields{i}]);
-                % Recursively print the first non-struct element with hierarchy
-                printAllFields(fieldValue, 1);
-            else
-                disp(['| — ', fields{i}]);
-                dispFieldValue(fieldValue, 1); % Display first 5 elements with indentation
-            end
+    % Additional display of array or large fields within the struct
+    fields = fieldnames(data);
+    for i = 1:numel(fields)
+        fieldValue = data.(fields{i});
+        if isstruct(fieldValue)
+            disp(['| — ', fields{i}]);
+            % Recursively print the first non-struct element with hierarchy
+            printAllFields(fieldValue, 1);
+        else
+            disp(['| — ', fields{i}]);
+            dispFieldValue(fieldValue, 1); % Display first 5 elements with indentation
         end
     end
 end
