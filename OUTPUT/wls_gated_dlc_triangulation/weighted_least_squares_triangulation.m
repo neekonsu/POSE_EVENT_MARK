@@ -2,17 +2,19 @@ function points = weighted_least_squares_triangulation(trialDir)
     % Store the trialName
     [~, trialName, ~] = fileparts(trialDir);
 
-    % Get list of camera folders [checked]
+    % Get list of camera folders
     camFolders = dir(fullfile(trialDir, '*'));
     camFolders = camFolders([camFolders.isdir] & ~ismember({camFolders.name}, {'.', '..'}));
     
-    % Number of camera folders [checked]
+    % Number of camera folders
     numCams = length(camFolders);
     
     % Initialize storage for basis vectors, projections, trajectories, and likelihoods
     projection_mat_all = cell(numCams, 1);
     trajectories_all = cell(numCams, 1);
     likelihoods_all = cell(numCams, 1);
+
+    num_frames = 0;
     
     % Iterate over each camera directory
     for cam = 1:numCams
@@ -53,14 +55,6 @@ function points = weighted_least_squares_triangulation(trialDir)
         P_j = [keypoints{4, 2}; keypoints{4, 3}];
         P_k = [keypoints{5, 2}; keypoints{5, 3}];
         
-        % Given:
-        % M: Projection matrix for camera
-        % e: basis 3D column vector scaled by measured distance di
-        % P: point 2D column vector of e projected into camera perspective
-        % Then we solve:
-        % [m11*d1;m12*d1;m21*d2;m22*d2;m13*d3;m23*d3]=[P_i;P_j;P_k];
-        % To find mij for the 2x3 matrix M corresponding to the camera
-        
         % Construct the system of equations to solve for the projection matrix elements
         D = [
             d1, 0, 0, 0, 0, 0;
@@ -83,7 +77,6 @@ function points = weighted_least_squares_triangulation(trialDir)
         projection_mat_all{cam} = projection_mat;
         
         % Extract the x, y, and likelihood columns from the pose file
-        % Assume the pose file has the following columns: scorer, bodyparts, coords (x, y, likelihood)
         x_cols = 2:3:size(pose, 2);
         y_cols = 3:3:size(pose, 2);
         likelihood_cols = 4:3:size(pose, 2);
@@ -102,11 +95,6 @@ function points = weighted_least_squares_triangulation(trialDir)
         likelihoods_all{cam} = pose(:, likelihood_cols);
     end
 
-    % Set global index to split computation
-    index_in_chunk = 1;
-    chunk_size = 10000;  
-    b = [];
-
     % Initialize the points matrix
     points = zeros(num_frames, num_bodyparts, 3);
 
@@ -117,12 +105,15 @@ function points = weighted_least_squares_triangulation(trialDir)
     tic; % Start timer
     
     for bodypart = 1:num_bodyparts
-        % Initialize matrices for WLS equation for chunks
-        X = [];
-        W = [];
-        y = [];
+        % Initialize b array for the current body part
+        b = zeros(num_frames, 3);
         
         for frame = 1:num_frames
+            % Initialize matrices for WLS equation for current frame
+            X = [];
+            W = [];
+            y = [];
+            
             for cam = 1:numCams
                 % Access projection mat M for current camera
                 projection_mat = projection_mat_all{cam};
@@ -137,52 +128,31 @@ function points = weighted_least_squares_triangulation(trialDir)
                 % Access likelihood for current frame, cam, bodypart
                 likelihood = likelihoods(frame, bodypart);
     
-                % Add projection matrix for current camera to diagonal of X
-                X = blkdiag(X, projection_mat);
+                % Add projection matrix for current camera to X
+                X = [X; projection_mat];
     
-                % Add likelihood twice to diagonal of W
+                % Add likelihood twice to W
                 W = blkdiag(W, likelihood * eye(2));
     
-                % Add current point column-wise to Y
+                % Add current point column-wise to y
                 y = [y; x_point; y_point];
             end
             
-            index_in_chunk = index_in_chunk + 1;
-            completed_steps = completed_steps + 1;
+            % Solve for the 3D point using weighted least squares
+            b(frame, :) = (X' * W * X) \ (X' * W * y);
             
             % Update progress bar
+            completed_steps = completed_steps + 1;
             waitbar(completed_steps / total_steps, waitbar_handle, ...
                 sprintf('Processing... %3.1f%% complete', completed_steps / total_steps * 100));
-            
-            % Check if we have reached the chunk size
-            if index_in_chunk > chunk_size
-                % Solve for the 3D point using weighted least squares for the chunk
-                b_chunk = (X' * W * X) \ (X' * W * y);
-                
-                % Store the 3D coordinates
-                b = [b; b_chunk];
-                
-                % Reset the matrices for the next chunk
-                X = [];
-                W = [];
-                y = [];
-                index_in_chunk = 1;
-            end
         end
         
-        % Solve for the remaining points if any
-        if ~isempty(X)
-            b_chunk = (X' * W * X) \ (X' * W * y);
-            b = [b; b_chunk];
-            % Clear memory for matrices
-            clear X W y
-        end
+        % Store the 3D coordinates for the current body part
+        points(:, bodypart, :) = b;
     end
     
     close(waitbar_handle); % Close the progress bar
     
-    disp(b);
-
     % Display the results
     disp('3D Points:');
     disp(points);
