@@ -90,8 +90,18 @@ function process_ns6_file(ns6File, ecogDataDir)
         mkdir(saveDir);
     end
     
+    % Split the file name by underscores
+    parts = strsplit(name, '_');
+    
+    % Construct the new file name
+    if length(parts) >= 4
+        newFileName = sprintf('%s_%s_%s_ECoG.mat', parts{1}, parts{2}, parts{end});
+    else
+        error('Unexpected file name format: %s', name);
+    end
+    
     % Save the loaded data
-    saveFileName = fullfile(saveDir, [name, '.mat']);
+    saveFileName = fullfile(saveDir, newFileName);
     save(saveFileName, 'ns6Data', '-v7.3');
     
     disp(['Saved data to ', saveFileName]);
