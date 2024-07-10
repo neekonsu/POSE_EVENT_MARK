@@ -1,4 +1,4 @@
-function displayMatFileContents()
+function mat_struct_summary()
     % Select the .mat file using a file dialog
     [filename, pathname] = uigetfile("*.mat", "Select a .mat file to view");
 
@@ -66,4 +66,3 @@ function dispFieldValue(fieldValue, level)
         disp([indent, num2str(fieldValue(j))]);
     end
 end
-displayMatFileContents();
