@@ -55,7 +55,7 @@ function align_events()
 
     % Load the struct stored in evtFile
     data = load(fullfile(evtPath, evtFile));
-    evtStruct = data.(fieldnames(data));
+    evtStruct = data.('dataEvent');
     framerate = 100;  % Example framerate, adjust as needed
 
     % Process each field in the struct
