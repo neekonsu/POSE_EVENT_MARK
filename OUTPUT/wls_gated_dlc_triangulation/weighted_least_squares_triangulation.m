@@ -15,6 +15,9 @@ function points = weighted_least_squares_triangulation(trialDir)
     likelihoods_all = cell(numCams, 1);
 
     num_frames = 0;
+
+    % Extrat Bodypart Names
+    % bodypart_names = [];
     
     % Iterate over each camera directory
     for cam = 1:numCams
@@ -89,6 +92,9 @@ function points = weighted_least_squares_triangulation(trialDir)
         trajectories_all{cam} = zeros(num_frames, num_bodyparts, 2);
         likelihoods_all{cam} = zeros(num_frames, num_bodyparts);
 
+        % Bodypart names
+        % bodypart_names = pose(2, 2:3:end);
+
         % Fill the trajectories and likelihoods matrices
         trajectories_all{cam}(:, :, 1) = pose(:, x_cols);
         trajectories_all{cam}(:, :, 2) = pose(:, y_cols);
@@ -148,7 +154,7 @@ function points = weighted_least_squares_triangulation(trialDir)
         end
         
         % Store the 3D coordinates for the current body part in the struct
-        bodypart_name = bodypart_names{bodypart};
+        bodypart_name = ['bodypart' num2str(bodypart)];
         points.(bodypart_name) = b;
     end
     
