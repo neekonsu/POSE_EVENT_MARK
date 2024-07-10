@@ -18,6 +18,8 @@ function align_events()
     % 6. Add metadata to the EVT struct.
     % 7. Prompt the user to select a save location and save the updated struct.
     
+    addpath('/Volumes/Smile347/ECoG-Decoding/Code/Functions')
+
     % Prompt the user to select the ECoG data directory
     ecogDataDir = uigetdir(pwd, 'Select the ECoG data directory');
     if ecogDataDir == 0
@@ -53,7 +55,7 @@ function align_events()
 
     % Load the struct stored in evtFile
     data = load(fullfile(evtPath, evtFile));
-    evtStruct = data.(fieldnames(data){1});
+    evtStruct = data.(fieldnames(data));
     framerate = 100;  % Example framerate, adjust as needed
 
     % Process each field in the struct
