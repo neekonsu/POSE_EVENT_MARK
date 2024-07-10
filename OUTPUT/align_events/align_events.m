@@ -73,7 +73,9 @@ function align_events()
     end
 
     % Store a new field titled metadata
-    evtStruct.metadata = [1, simi_start_sample; simi_end_sample * framerate / sample_rate, simi_end_sample];
+    evtStruct.metadata.triggers = [1, simi_start_sample; round((simi_end_sample - simi_start_sample) * framerate / sample_rate), simi_end_sample];
+    evtStruct.metadata.samplingRate = sample_rate;
+    evtStruct.metadata.frameRate = framerate;
 
     % Prompt the user to select a save directory
     saveDir = uigetdir('', 'Select a directory to save the updated struct');
