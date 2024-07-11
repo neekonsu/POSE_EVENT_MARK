@@ -39,12 +39,12 @@ function trajectories = format_trj_struct()
     % Extract Name Parts
     subjectName = nameParts{1};
     sessionDate = nameParts{2};
-    experimentType = strjoin(nameParts{3:end-1}, '_');
+    experimentType = strjoin(nameParts(3:end-1), '_');
     trialNumber = nameParts{end};
 
     % Map abbreviated Experiment Types to Descriptions
-    experimentTypes = {"ARM", "ARM_BC", "ARM_PN", "SS"};
-    experimentDescriptions = {"Small Sphere", "Big Cylinder", "Triangle Pinching", "Small Sphere"};
+    experimentTypes = ["ARM", "ARM_BC", "ARM_PN", "SS"];
+    experimentDescriptions = ["Small Sphere", "Big Cylinder", "Triangle Pinching", "Small Sphere"];
     experimentMap = dictionary(experimentTypes, experimentDescriptions);
     % Extract experiment description
     if experimentMap.isKey(experimentType)
@@ -80,7 +80,7 @@ function trajectories = format_trj_struct()
     numCams = length(camFolders);
 
     % Get files in folder
-    dlcFiles = dir(fullfile(dlcDir, '*'));
+    dlcFiles = {dir(dlcDir).name};
 
     for cam = 1:numCams
         % Get current camera folder
@@ -94,7 +94,7 @@ function trajectories = format_trj_struct()
         camNum = regexp(camFolder.name, '\d+', 'match', 'once');
 
         % Construct Video Name
-        videoName = sprintf("%s_%s_%s_%s-%s.avi", subjectName, sessionDate, experimentType, trialNumber, camNum);
+        videoName = sprintf("%s_%s_%s_%s-%s", subjectName, sessionDate, experimentType, trialNumber, camNum);
 
         % Assign extracted values to corresponding fields in MetaTags
         trajectories.CamInfo(cam).CameraName = camFolder.name;
@@ -102,7 +102,7 @@ function trajectories = format_trj_struct()
 
         %% STEP 5
         % Match name of dlc_to_simi_mat file by beginning containing video name
-        dlcMatPattern = sprintf('^%s.*\\.mat$', videoName);
+        dlcMatPattern = sprintf('^%s.*\\_reencoded.mat$', videoName);
         % Filter files in camera folder by regexp
         dlcmatFile = dlcFiles(~cellfun('isempty', regexp(dlcFiles, dlcMatPattern)));
         % Check that there was a corresponding file, skip camera if missing
@@ -112,7 +112,7 @@ function trajectories = format_trj_struct()
             continue;
         end
         % Load 2D trajectory for current camera and assign to corresponding field in CamInfo(i)
-        camTrajectories = load(dlcmatFile);
+        camTrajectories = load(strjoin(fullfile(dlcDir, dlcmatFile)));
         trajectories.CamInfo(cam).Trajectories = camTrajectories;
     end
 
@@ -120,20 +120,18 @@ function trajectories = format_trj_struct()
     addpath(path);
 
     % Load Trajectory struct from file
-    trajectoryStruct = load(trajectoryFile);
+    trajectoryStruct = load(fullfile(path,trajectoryFile));
     % Assign Trajectory struct to new struct
-    trajectories.Trajectories = trajectoryStruct;
+    trajectories.Trajectories = trajectoryStruct.points;
 
     % Prompt the user to select a save directory
     saveDir = uigetdir('', 'Select a directory to save the output');
 
-    if safeDir ~= 0
+    if saveDir ~= 0
         % Save 'trajectories' to file
         save(fullfile(saveDir, [trialName, '_TRJ.mat']), 'trajectories');
         % Add path for mat_struct_summary.m
         addpath("../../PREPROCESSING/mat_struct_summary");
-        % Allow user option to preview the newly created struct
-        mat_struct_summary();
     else
         disp('User cancelled the directory selection');
     end
