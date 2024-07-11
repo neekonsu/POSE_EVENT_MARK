@@ -1,4 +1,4 @@
-function trajectories = format_trj_struct(oldStruct)
+function trajectories = format_trj_struct()
     % FORMAT_TRJ_STRUCT Provided a struct exported by the old format of weighted_least_squares_triangulation
     % (Pre-Commit e4921c93f1cf737af3a31fe998f58fa53844ec9f)
     % Reformat the struct to the production format
