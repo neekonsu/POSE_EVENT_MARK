@@ -154,7 +154,8 @@ function points = weighted_least_squares_triangulation(trialDir)
         end
         
         % Store the 3D coordinates for the current body part in the struct
-        bodypart_name = ['bodypart' num2str(bodypart)];
+        bodypartList = {"thumb_tip","index_tip","wrist","forearm","elbow","upper_arm","shoulder"};
+        bodypart_name = bodypartList(bodypart);
         points.(bodypart_name) = b;
     end
     
