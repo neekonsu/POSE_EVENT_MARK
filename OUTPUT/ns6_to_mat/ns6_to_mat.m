@@ -8,6 +8,9 @@ function ns6_to_mat()
     % 5. Loads each NS6 file.
     % 6. Saves the loaded data to a .mat file in a newly created output directory.
 
+    % Include helper functions for loading ns6
+    addpath('../../POSTPROCESSING/LDA/ECoG Decode LDA/Functions');
+
     % Prompt user for interactive or automatic mode
     choice = questdlg('Choose processing mode:', ...
         'Mode Selection', ...
