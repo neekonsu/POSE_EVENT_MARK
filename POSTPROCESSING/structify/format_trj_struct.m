@@ -115,4 +115,26 @@ function trajectories = format_trj_struct(oldStruct)
         camTrajectories = load(dlcmatFile);
         trajectories.CamInfo(cam).Trajectories = camTrajectories;
     end
+
+    [trajectoryFile, path] = uigetfile("*_TRJ.mat", "Select 3D Trajectories File");
+    addpath(path);
+
+    % Load Trajectory struct from file
+    trajectoryStruct = load(trajectoryFile);
+    % Assign Trajectory struct to new struct
+    trajectories.Trajectories = trajectoryStruct;
+
+    % Prompt the user to select a save directory
+    saveDir = uigetdir('', 'Select a directory to save the output');
+
+    if safeDir ~= 0
+        % Save 'trajectories' to file
+        save(fullfile(saveDir, [trialName, '_TRJ.mat']), 'trajectories');
+        % Add path for mat_struct_summary.m
+        addpath("../../PREPROCESSING/mat_struct_summary");
+        % Allow user option to preview the newly created struct
+        mat_struct_summary();
+    else
+        disp('User cancelled the directory selection');
+    end
 end
