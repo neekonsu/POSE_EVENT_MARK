@@ -1,16 +1,13 @@
-function mat_struct_summary(filepath)
-    % Check if the file exists
-    if exist(filepath, 'file') ~= 2
-        disp('File does not exist');
-        return;
-    end
+function mat_struct_summary()
+    [file, dir]  = uigetfile("*.mat", "Select struct to summarize");
 
+    addpath(dir);
     % Load the .mat file
-    data = load(filepath);
+    data = load(file);
 
     % Display variables in the .mat file
     disp('Variables in the .mat file:');
-    whos('-file', filepath);
+    whos('-file', file);
 
     % Display the structure of the loaded data
     disp('Structure of the loaded data:');

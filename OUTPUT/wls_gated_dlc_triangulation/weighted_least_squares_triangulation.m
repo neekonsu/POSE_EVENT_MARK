@@ -163,7 +163,7 @@ function points = weighted_least_squares_triangulation(trialDir)
     % Prompt the user to select a save directory
     saveDir = uigetdir('', 'Select a directory to save the output');
 
-    addpath("../../INPUT/mat_struct_summary");
+    addpath("../../PREPROCESSING/mat_struct_summary");
 
     if saveDir ~= 0
         % Save the struct as '{trialName}_TRJ.mat'
