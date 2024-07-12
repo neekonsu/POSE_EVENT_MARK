@@ -8,7 +8,7 @@ addpath("../../TESTS/generate_shifting_keypoints_1D");
 
 % Use the function to approximate the original signal
 threshold = 5; % Adjust the threshold as needed
-[estimated_signal, transition_times] = split_shifting_keypoints_1D(signal_with_noise, threshold);
+[estimated_signal, ~] = split_shifting_keypoints_1D(signal_with_noise, threshold);
 
 % Plot the stack of the original and estimated signals
 figure;

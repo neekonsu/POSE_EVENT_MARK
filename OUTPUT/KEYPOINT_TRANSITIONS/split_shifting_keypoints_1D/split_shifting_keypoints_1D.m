@@ -15,7 +15,7 @@ function [estimated_signal, transition_times] = split_shifting_keypoints_1D(nois
     estimated_signal(1) = current_level;
     for i = 2:signal_length
         if abs(smoothed_signal(i) - current_level) > threshold
-            transition_times = [transition_times, i];
+            transition_times = [transition_times, i]; % Current frame exceeds threshold, add to transition times.
             current_level = smoothed_signal(i);
         end
         estimated_signal(i) = current_level;
