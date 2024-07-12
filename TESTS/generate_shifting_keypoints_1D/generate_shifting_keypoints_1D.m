@@ -1,4 +1,4 @@
-function output_signal = generate_shifting_keypoints_1D()
+function [clean_signal, noisy_signal] = generate_shifting_keypoints_1D()
     % GENERATE_SHIFTING_KEYPOINTS
     
     % Parameters
@@ -77,4 +77,7 @@ function output_signal = generate_shifting_keypoints_1D()
     ylabel('Amplitude');
     grid on;
     ylim([0, max(signal_with_noise) + 10]); % Ensure y-axis starts from zero    
+
+    clean_signal = signal;
+    noisy_signal = signal_with_noise;
 end
