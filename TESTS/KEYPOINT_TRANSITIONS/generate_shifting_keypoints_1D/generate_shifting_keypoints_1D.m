@@ -1,8 +1,7 @@
-function [clean_signal, noisy_signal] = generate_shifting_keypoints_1D()
+function [clean_signal, noisy_signal] = generate_shifting_keypoints_1D(signal_length)
     % GENERATE_SHIFTING_KEYPOINTS
     
     % Parameters
-    signal_length = 1000; % Length of the signal
     num_levels = 5; % Number of discrete levels
     min_segment_length = round(0.2 * signal_length); % Minimum length of each level (20% of the signal length)
     max_segment_length = round(0.4 * signal_length); % Maximum length of each level

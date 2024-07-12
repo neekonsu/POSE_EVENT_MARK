@@ -1,10 +1,11 @@
-function [estimated_signal, transition_times] = split_shifting_keypoints_1D(noisy_signal, threshold)
+function [estimated_signal, transition_times] = split_shifting_keypoints_1D(noisy_signal, threshold, window_size)
     % Parameters
     signal_length = length(noisy_signal);
     transition_times = [];
     
     % Smooth the signal using a moving average filter
-    window_size = 50; % Adjust the window size as needed
+    % threshold = 2; % Adjust threshold as needed
+    % window_size = 50; % Adjust the window size as needed
     smoothed_signal = movmean(noisy_signal, window_size);
     
     % Initialize the estimated signal
