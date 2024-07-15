@@ -74,22 +74,3 @@
 % |-lebeled-data/
 % |-evaluation-result/
 % |-dlc-models/
-
-% Step 1: Select videos folder containing all .avi and .csv corresponding
-% to trials, found in DLC project folder
-videosFolderPath = prompt_video_folder();
-% Step 2: Create folder structure for analyzing 3D trajectories on
-% per-trial basis
-create_trial_folders(videosFolderPath);
-
-% Step 3: Select single trial for extracting 3D trajectories and label
-% keypoints
-trialDir = uigetdir("*", "Select trial directory to process");
-label_keypoints(trialDir);
-
-% Step 4: Load pose data, triangulate, optimize, and generate 3D trajectories
-points = weighted_least_squares_triangulation(trialDir);
-save("trialDir", "points");
-
-% Step 5: Generate GIF animation of 3D trajectories
-generate_gif(uigetfile("*.mat", "Select .mat file containing 3D trajectory"));

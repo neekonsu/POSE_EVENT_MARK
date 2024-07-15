@@ -1,4 +1,4 @@
-function dlc_to_simi_mat()
+function dlc_csv_to_struct() %TODO: AUTOMATIZE
     % Prompt the user to select a folder
     folderPath = uigetdir('.', 'Select a Folder Containing CSV Files');
 

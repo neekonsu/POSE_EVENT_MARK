@@ -1,4 +1,4 @@
-function label_keypoints(trialDir)
+function extract_initial_keypoints(trialDir) %TODO: AUTOMATIZE
     % LABEL_KEYPOINTS   Function to label keypoints on frames in a given trial directory
     % trialDir: Directory containing folders for each camera angle during a
     % single trial. Typically 8 Camera Angles
