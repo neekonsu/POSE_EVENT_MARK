@@ -9,6 +9,14 @@ addpath("../../../OUTPUT/EVENT_MARKING/");
 addpath("../../../OUTPUT/KEYPOINT_TRANSITIONS/assign_constant_keypoints"); % Create new script to iterate keypoint shift marks from _events.mat files, generate constant keypoint epochs per trial
 addpath("../../../OUTPUT/weighted_least_squares"); % refactor wls collection to split up functions, using standalone script here.
 
+%% INITIAL VARIABLES
+DLC_SOURCEDIR = nan;
+BR_SOURCEDIR = nan;
+CURR_TRIAL = struct();
+CURR_TRIAL.name = "";
+CURR_TRIAL.dir = nan;
+
+
 %% Step 1: Create Trial Folder Structure
 % IN: DeepLabCut 'Videos/' folder
 % OUT: PIPELINE trial-based folder structure
@@ -17,15 +25,19 @@ addpath("../../../OUTPUT/weighted_least_squares"); % refactor wls collection to 
 % <trialName>/CAM<camNum>/<trialName>-<camNum>.avi <~ Symlink to copy in DLC folder
 % <trialName>/CAM<camNum>/<trialName>-<camNum>_frame00001.png <~ First frame of video
 % <trialName>/CAM<camNum>/<trialName>-<camNum><DLC_MODEL_NAME>.csv <~ 2D DLC Trajectory 
-SOURCEDIR = uigetdir(".", "Please Select Directory of DeepLabCut Output (\'Videos/\')");
 
+% Prompt user for core directories of source data - Deeplabcut videos directory - Blackrock ecog directory
+DLC_SOURCEDIR = uigetdir(".", "Please Select Directory of DeepLabCut Output (\'Videos/\')");
+BR_SOURCEDIR = uigetdir(".", "Please Select Directory of Blackrock Output (\'<TRIALNAME>_BLACKROCK\')"); % Check that this directory name matches the actual
 
-
+% Create trial directories from names of videos within Deeplabcut 'videos' directory, retain list of trial names and video names found.
+[trialNames, videoNames, trajectoryNames] = create_trial_folders(DLC_SOURCEDIR);
 
 %% Step 2: Extract Keypoints For Initial Frames
 % IN: Trial Folder Structure (frame00001.png)
 % OUT: Keypoints struct per trial/camera
 % <trialName>/CAM<camNum>/<trialName>-<camNum>_keypoints.mat
+
 
 %% Step 3: Convert DLC files to .mat Structs
 % IN: Trial Folder Structure (DLC .csv Files)
