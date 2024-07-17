@@ -18,14 +18,7 @@ function align_events()
     % 6. Add metadata to the EVT struct.
     % 7. Prompt the user to select a save location and save the updated struct.
     
-    addpath('../../../POSTPROCESSING/LDA/ECoG Decode LDA/Functions');
-
-    % Prompt the user to select the ECoG data directory
-    ecogDataDir = uigetdir(pwd, 'Select the ECoG data directory');
-    if ecogDataDir == 0
-        disp('User canceled the directory selection');
-        return;
-    end
+    addpath('../../../POSTPROCESSING/LDA/ECoG Decode LDA/Functions/');
 
     % Prompt the user to select the EVT file
     [evtFile, evtPath] = uigetfile('*.mat', 'Select the EVT File');
@@ -50,8 +43,8 @@ function align_events()
     end
 
     % Call process_nsx_files to extract information from those files
-    trigger_threshold = 50;  % Example threshold, adjust as needed
-    [simi_start_sample, simi_end_sample, sample_rate] = process_nsx_files(ns6File, ns5File, ecogDataDir, trigger_threshold);
+    trigger_threshold = 50;  % Trigger threshold, adjust as needed
+    [simi_start_sample, simi_end_sample, sample_rate] = process_nsx_files(ns6File, ns5File, ns6Path, trigger_threshold);
 
     % Load the struct stored in evtFile
     data = load(fullfile(evtPath, evtFile));
