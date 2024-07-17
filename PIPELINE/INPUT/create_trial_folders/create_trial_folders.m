@@ -1,13 +1,19 @@
-function [trial_names, video_names, trajectory_names] = create_trial_folders(videosFolderPath)
+function [trial_names, video_names, trajectory_names] = create_trial_folders(videosFolderPath, blackrockFolderPath)
     
     % Store list of video files in 'videos' path
     aviFiles = dir(fullfile(videosFolderPath, '*.avi'));
 
+    % Store list of ns5 and ns6 Blackrock ECoG files
+    ns6Files = dir(fullfile(blackrockFolderPath, '*.ns6'));
+
     % Store list of extracted trial names used in creation of trial folders.
     trial_names = [];
-
-    % Store list of extracted names from videos used in creation of trial folders.
+    % Store list of extracted video names used in creation of trial folders.
     video_names = [];
+    % Store list of extracted trajectory names used in creation of trial folders.
+    trajectory_names = [];
+    % Store list of extracted blackrock naems used in crteation of trial folders.
+    blackrock_names = [];
 
     % Iterate avi and csv files to produce desired folder structure
     for i = 1:length(aviFiles)
@@ -44,11 +50,27 @@ function [trial_names, video_names, trajectory_names] = create_trial_folders(vid
             disp("No trajectory file found for video %s", aviName);
         end
 
+        % Copy Blackrock ns5 and ns6 files to trial dir
+        ns5File = fullfile(blackrockFolderPath, sprintf("%s.ns5", trialName));
+        ns6File = fullfile(blackrockFolderPath, sprintf("%s.ns6", trialName));
+        if exist(ns5File, "file") && exist(ns6File, "file")
+            copyfile(ns5File, trialDir, 'f');
+            copyfile(ns6File, trialDir, 'f');
+            blackrock_names = [blackrock_names, sprintf("%s.ns6", trialName)]; %#ok<AGROW>
+        else
+            disp("One or both Blackrock files (ns5 & ns6) unavailable for trial: %s", trialName);
+        end
+
         % Write first frame to camera dir
         videoFilePath = fullfile(videosFolderPath, aviFiles(i).name);
         video = VideoReader(videoFilePath);
         frame = readFrame(video);
         frameFileName = sprintf("frame0001.png");
         imwrite(frame, fullfile(cameraDir, frameFileName));
+    end
+
+    if ~isempty(setdiff(ns6Files, blackrock_names))
+        disp("The following Blackrock files were not used during the initialization of trial folders:");
+        disp(setdiff(ns6Files, blackrock_names));
     end
 end 
