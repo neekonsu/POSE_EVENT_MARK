@@ -1,4 +1,4 @@
-function dlc_csv_to_struct() %TODO: AUTOMATIZE
+function dlc_csv_to_struct_all()
     % Prompt the user to select a folder
     folderPath = uigetdir('.', 'Select a Folder Containing CSV Files');
 
