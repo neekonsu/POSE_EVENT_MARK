@@ -2,12 +2,13 @@
 % SIMI - Blackrock - DLC - Pipeline for aligning neural data to behavioral events and 3D bodypart trajectories.
 % Author: Neekon Saadat [JUIN - SEPT 2024]
 
-addpath("../../../INPUT/create_trial_folders"); % refactor script from wls collection into its own exported function and folder
-addpath("../../../INPUT/extract_initial_keypoints"); % refactor script from KEYPOINTS collection into its own exported function and folder
-addpath("../../../INPUT/dlc_csv_to_struct/"); % refactor script from dlc_to_simi_mat collection into its own exported function and folder
-addpath("../../../OUTPUT/EVENT_MARKING/"); 
-addpath("../../../OUTPUT/KEYPOINT_TRANSITIONS/assign_constant_keypoints"); % Create new script to iterate keypoint shift marks from _events.mat files, generate constant keypoint epochs per trial
-addpath("../../../OUTPUT/weighted_least_squares"); % refactor wls collection to split up functions, using standalone script here.
+addpath("../../INPUT/create_trial_folders"); % refactor script from wls collection into its own exported function and folder
+addpath("../../INPUT/blackrock_to_struct")
+addpath("../../INPUT/extract_initial_keypoints"); % refactor script from KEYPOINTS collection into its own exported function and folder
+addpath("../../INPUT/dlc_csv_to_struct/"); % refactor script from dlc_to_simi_mat collection into its own exported function and folder
+addpath("../../OUTPUT/EVENT_MARKING/"); 
+addpath("../../OUTPUT/KEYPOINT_TRANSITIONS/assign_constant_keypoints"); % Create new script to iterate keypoint shift marks from _events.mat files, generate constant keypoint epochs per trial
+addpath("../../OUTPUT/weighted_least_squares"); % refactor wls collection to split up functions, using standalone script here.
 
 %% INITIAL VARIABLES
 DLC_SOURCEDIR = nan;
@@ -33,11 +34,17 @@ BR_SOURCEDIR = uigetdir(".", "Please Select Directory of Blackrock Output (\'<TR
 % Create trial directories from names of videos within Deeplabcut 'videos' directory, retain list of trial names and video names found.
 [trialNames, videoNames, trajectoryNames] = create_trial_folders(DLC_SOURCEDIR);
 
-%% Step 2: Extract Keypoints For Initial Frames
+%% Step 2a: Extract Keypoints For Initial Frames
 % IN: Trial Folder Structure (frame00001.png)
 % OUT: Keypoints struct per trial/camera
 % <trialName>/CAM<camNum>/<trialName>-<camNum>_keypoints.mat
-extract_initial_keypoints()
+extract_initial_keypoints();
+
+%% Step 2b: Convert ECoG Data to .mat Files
+% IN: Trial Folder Structure (Blackrock .ns5 and .ns6 Files)
+% OUT: ECoG Data .mat file
+% <trialName>/<trialName>_ecog.mat
+blackrock_to_struct();
 
 %% Step 3: Convert DLC files to .mat Structs
 % IN: Trial Folder Structure (DLC .csv Files)
@@ -63,11 +70,6 @@ extract_initial_keypoints()
 % IN: Trial Folder Structure (All Containing Files)
 % OUT: 3D Trajectories File Per Trial
 % <trialName>/<trialName>_trajectory.mat
-
-%% Step 5: Convert ECoG Data to .mat Files
-% IN: Trial Folder Structure (Blackrock .ns5 and .ns6 Files)
-% OUT: ECoG Data .mat file
-% <trialName>/<trialName>_ecog.mat
 
 %% Step 6: Export Trial Structs
 % IN: Trial Folder Structure (All Containing Files)
