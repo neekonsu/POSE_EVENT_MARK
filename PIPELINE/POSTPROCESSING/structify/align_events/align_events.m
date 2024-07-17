@@ -1,6 +1,6 @@
 function align_events()
     % align_events
-    % 
+    %
     % This function aligns events from ECoG data with corresponding video data by
     % processing NS5 and NS6 files to extract sample information and updating an
     % event (EVT) structure with these sample timings. The user is prompted to 
