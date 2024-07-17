@@ -42,7 +42,7 @@ function [trial_names, video_names, trajectory_names] = create_trial_folders(vid
         end
 
         % Copy trajectory CSV to camera dir
-        trajectoryFile = fullfile(videosFolderPath, sprintf("%s*.csv",aviName));
+        trajectoryFile = fullfile(videosFolderPath, sprintf("%s*.mat",aviName));
         if exist(trajectoryFile, "file")
             copyfile(trajectoryFile, cameraDir, 'f');
             trajectory_names = [trajectory_names, trajectoryFile]; %#ok<AGROW>
@@ -61,12 +61,13 @@ function [trial_names, video_names, trajectory_names] = create_trial_folders(vid
             disp("One or both Blackrock files (ns5 & ns6) unavailable for trial: %s", trialName);
         end
 
-        % Write first frame to camera dir
+        % Write first frame to camera dir and move source video
         videoFilePath = fullfile(videosFolderPath, aviFiles(i).name);
         video = VideoReader(videoFilePath);
         frame = readFrame(video);
-        frameFileName = sprintf("frame0001.png");
+        frameFileName = sprintf("frame00001.png");
         imwrite(frame, fullfile(cameraDir, frameFileName));
+        movefile(videoFilePath, cameraDir);
     end
 
     if ~isempty(setdiff(ns6Files, blackrock_names))

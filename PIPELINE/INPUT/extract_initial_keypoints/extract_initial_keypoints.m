@@ -1,4 +1,4 @@
-function extract_initial_keypoints(trialDir) %TODO: AUTOMATIZE
+function extract_initial_keypoints(trialDir)
     % LABEL_KEYPOINTS   Function to label keypoints on frames in a given trial directory
     % trialDir: Directory containing folders for each camera angle during a
     % single trial. Typically 8 Camera Angles
@@ -14,7 +14,7 @@ function extract_initial_keypoints(trialDir) %TODO: AUTOMATIZE
 
     for i = 1:numCams
         % Read the first frame of the current camera
-        frame = imread(fullfile(folderPath, camFolders(i).name, 'frame0001.png'));
+        frame = imread(fullfile(folderPath, camFolders(i).name, 'frame00001.png'));
         
         % Get image size
         [imgHeight, imgWidth, ~] = size(frame);

@@ -8,7 +8,7 @@ function blackrock_to_struct(trialDir)
     ns6File = fullfile(trialDir, sprintf("%s.ns6", trialName));
     ns5File = fullfile(trialDir, sprintf("%s.ns5", trialName));
 
-    % Load the NS6 file
+    % Load the Blackrock files
     ns6Data = openNSxCervical(ns6File);
 
     % Load the ns5 file and find the camera triggers
@@ -22,7 +22,6 @@ function blackrock_to_struct(trialDir)
     % Determine the start and end triggers
     startTrigger = cameraTrigs(1);
     endTrigger = cameraTrigs(end);
-    clear ns5Data
     
     % Load the ns6 file and determine the trimming range
     ns6SampleRate = ns6Data.MetaTags.SamplingFreq;
@@ -36,5 +35,6 @@ function blackrock_to_struct(trialDir)
     ns6Data.MetaTags.syncInfo.endSample = end_sample;
 
     save(fullfile(trialDir, sprintf("%s_ecog", trialName), "ns6Data"));
-    clear ns6Data
+    clear ns5Data;
+    clear ns6Data;
 end
