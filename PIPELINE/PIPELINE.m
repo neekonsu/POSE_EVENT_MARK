@@ -37,7 +37,7 @@ BR_SOURCEDIR = uigetdir(".", "Please Select Directory of Blackrock Output (\'<TR
 % IN: Trial Folder Structure (frame00001.png)
 % OUT: Keypoints struct per trial/camera
 % <trialName>/CAM<camNum>/<trialName>-<camNum>_keypoints.mat
-
+extract_initial_keypoints()
 
 %% Step 3: Convert DLC files to .mat Structs
 % IN: Trial Folder Structure (DLC .csv Files)

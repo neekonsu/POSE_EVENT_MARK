@@ -18,7 +18,7 @@ function align_events()
     % 6. Add metadata to the EVT struct.
     % 7. Prompt the user to select a save location and save the updated struct.
     
-    addpath('../../POSTPROCESSING/LDA/ECoG Decode LDA/Functions');
+    addpath('../../../POSTPROCESSING/LDA/ECoG Decode LDA/Functions');
 
     % Prompt the user to select the ECoG data directory
     ecogDataDir = uigetdir(pwd, 'Select the ECoG data directory');
