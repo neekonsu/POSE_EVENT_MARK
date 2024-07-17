@@ -38,13 +38,13 @@ BR_SOURCEDIR = uigetdir(".", "Please Select Directory of Blackrock Output (\'<TR
 % IN: Trial Folder Structure (frame00001.png)
 % OUT: Keypoints struct per trial/camera
 % <trialName>/CAM<camNum>/<trialName>-<camNum>_keypoints.mat
-extract_initial_keypoints();
+extract_initial_keypoints(); %check if needs for loop
 
 %% Step 2b: Convert ECoG Data to .mat Files
 % IN: Trial Folder Structure (Blackrock .ns5 and .ns6 Files)
 % OUT: ECoG Data .mat file
 % <trialName>/<trialName>_ecog.mat
-blackrock_to_struct();
+blackrock_to_struct(); %implement for loop
 
 %% Step 3: Convert DLC files to .mat Structs
 % IN: Trial Folder Structure (DLC .csv Files)
