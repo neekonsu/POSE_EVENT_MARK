@@ -69,9 +69,4 @@ function [trial_names, video_names, trajectory_names] = create_trial_folders(vid
         imwrite(frame, fullfile(cameraDir, frameFileName));
         movefile(videoFilePath, cameraDir);
     end
-
-    if ~isempty(setdiff(ns6Files, blackrock_names))
-        disp("The following Blackrock files were not used during the initialization of trial folders:");
-        disp(setdiff(ns6Files, blackrock_names));
-    end
 end 
