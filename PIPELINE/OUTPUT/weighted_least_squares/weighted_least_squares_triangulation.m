@@ -1,4 +1,4 @@
-function points = weighted_least_squares_triangulation(trialDir)
+function points = weighted_least_squares_triangulation(dlc_struct_cam1, dlc_struct_cam2, struct_keypoints)
     % Store the trialName
     [~, trialName, ~] = fileparts(trialDir);
 
@@ -15,9 +15,6 @@ function points = weighted_least_squares_triangulation(trialDir)
     likelihoods_all = cell(numCams, 1);
 
     num_frames = 0;
-
-    % Extrat Bodypart Names
-    % bodypart_names = [];
     
     % Iterate over each camera directory
     for cam = 1:numCams
@@ -135,13 +132,13 @@ function points = weighted_least_squares_triangulation(trialDir)
                 likelihood = likelihoods(frame, bodypart);
     
                 % Add projection matrix for current camera to X
-                X = [X; projection_mat];
+                X = [X; projection_mat]; %#ok<AGROW>
     
                 % Add likelihood twice to W
                 W = blkdiag(W, likelihood * eye(2));
     
                 % Add current point column-wise to y
-                y = [y; x_point; y_point];
+                y = [y; x_point; y_point]; %#ok<AGROW>
             end
             
             % Solve for the 3D point using weighted least squares
