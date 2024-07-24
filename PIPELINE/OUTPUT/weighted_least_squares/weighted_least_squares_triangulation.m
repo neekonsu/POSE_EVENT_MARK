@@ -155,7 +155,7 @@ function points = weighted_least_squares_triangulation(trialDir)
         
         % Store the 3D coordinates for the current body part in the struct
         bodypartList = {"thumb_tip","index_tip","wrist","forearm","elbow","upper_arm","shoulder"};
-        bodypart_name = bodypartList(bodypart);
+        bodypart_name = bodypartList{bodypart};
         points.(bodypart_name) = b;
     end
     
@@ -169,9 +169,6 @@ function points = weighted_least_squares_triangulation(trialDir)
     if saveDir ~= 0
         % Save the struct as '{trialName}_TRJ.mat'
         save(fullfile(saveDir, [trialName, '_TRJ.mat']), 'points');
-        
-        % Call the external function to print the struct summary
-        mat_struct_summary(fullfile(saveDir, [trialName, '_TRJ.mat']));
     else
         disp('User canceled the directory selection');
     end
