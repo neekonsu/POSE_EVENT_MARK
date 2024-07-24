@@ -109,7 +109,7 @@ function points = weighted_least_squares_triangulation(dlc_struct_cam1, dlc_stru
     end
 
     % Initialize the points matrix
-    Trajectories = struct();
+    points = struct();
 
     % Initialize the progress bar
     total_steps = numBodyparts * numFrames;
