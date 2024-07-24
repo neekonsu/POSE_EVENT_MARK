@@ -1,5 +1,4 @@
 clc;
-clear all;
 close all;
 
 filenm = 'JJ08_20240130_CORR_DOPA_002_KIN';
