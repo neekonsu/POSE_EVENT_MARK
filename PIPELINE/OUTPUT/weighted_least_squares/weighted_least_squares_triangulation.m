@@ -1,138 +1,168 @@
-function points = weighted_least_squares_triangulation(dlc_struct_cam1, dlc_struct_cam2, struct_keypoints)
-    % Store the trialName
-    [~, trialName, ~] = fileparts(trialDir);
+function points = weighted_least_squares_triangulation(dlc_struct_cam1, dlc_struct_cam2, struct_keypoints_cam1, struct_keypoints_cam2)
+    % WEIGHTED_LEAST_SQUARES_TRIANGULATION
+    % This function performs weighted least squares triangulation on at least two camera angles of pose estimation data.
+    % The current version of this function defaults to using two camera angles.
 
-    % Get list of camera folders
-    camFolders = dir(fullfile(trialDir, '*'));
-    camFolders = camFolders([camFolders.isdir] & ~ismember({camFolders.name}, {'.', '..'}));
-    
-    % Number of camera folders
-    numCams = length(camFolders);
-    
+    % Store number of camera angles
+    numCams = 2;
+
     % Initialize storage for basis vectors, projections, trajectories, and likelihoods
-    projection_mat_all = cell(numCams, 1);
-    trajectories_all = cell(numCams, 1);
-    likelihoods_all = cell(numCams, 1);
+    projections_all = cell(numCams, 1);
 
-    num_frames = 0;
+    % Combine keypoints structs into array for indexing by camera
+    keypoints_structs = [struct_keypoints_cam1, struct_keypoints_cam2];
+
+    % Get bodypart names from dlc_structs
+    % CONTRACT: all camera angles must be processed with the same set of bodyparts (DLC analyze videos)
+    bodyparts = fieldnames(dlc_struct_cam1);
+
+    % Get number of bodyparts
+    numBodyparts = size(bodyparts);
+
+    % Get number of frames
+    % CONTRACT: all camera angles must capture the same number of frames
+    numFrames = size(dlc_struct_cam1.(bodyparts{1}).x, 1);
+
+    % Join dlc structs into cell array for indexable access
+    dlc_structs_all = cell(2,1);
+    dlc_structs_all{1} = dlc_struct_cam1;
+    dlc_structs_all{2} = dlc_struct_cam2;
     
-    % Iterate over each camera directory
+    % Generate projection matrices for each camera
     for cam = 1:numCams
-        % Store Camera Folder
-        camFolder = camFolders(cam);
 
-        % Define the path for the current camera folder and ls
-        camFolderPath = fullfile(trialDir, camFolder.name);
-        camFiles  = {dir(camFolderPath).name};
+        % Get keypoints struct for current camera
+        keypointStruct = keypoints_structs(cam);
 
-        % Extract the camera number from the camera folder name
-        camNum = regexp(camFolder.name, '\d+', 'match', 'once');
+        % Get keypoints coordinates table and size from struct for current camera
+        keypointCoordinates = keypointStruct.Coordinates;
+        keypointCoordinatesRows = size(keypointCoordinates, 1);
 
-        % Construct the expected pose CSV filename pattern
-        poseFilePattern = sprintf('^%s-%s.*\\.csv$', trialName, camNum);
+        % Initialize table for storing projection matrices corresponding to transition frames
+        projectionTable = cell(keypointCoordinatesRows, 2);
 
-        % Filter files in camera folder by regexp
-        csvFile   = camFiles(~cellfun('isempty', regexp(camFiles, poseFilePattern)));
-        
-        % Load the keypoints.csv file
-        keypoints = readcell(fullfile(camFolderPath, 'keypoints.csv'));
+        % Get keypoint names and number of names from struct for current camera (origin included, matches columns of keypointsCoordinates table)
+        % CONTRACT: there must only be three basis keypoints
+        keypointNames = fieldnames(keypointStruct.OriginDistance);
+        keypointNamesLength = 3; % 3 by CONTRACT
 
-        % Check if the corresponding pose CSV file was found
-        if isempty(csvFile)
-            error('No corresponding pose CSV file found for %s', camFolders(cam).name);
+        % Initialize array for storing keypoint distances from origin (redundant, remove later, preemptive inclusion for stepping)
+        keypointOriginDistance = zeros(keypointNamesLength);
+
+        % Initialize D matrix storing two copies of each origin distance along its diagonal, for solving the projection matrices
+        keypointOriginDistanceMatrix = zeros(keypointNamesLength, keypointNamesLength);
+
+        % Construct array of distances in order of keypointNames 
+        for i = 1:keypointNamesLength
+            % Get ith keypointName's corresponding origin distance (reference order to keypointNames for ensuring consistency)
+            ithKeypointOriginDistance = keypointStruct.OriginDistance.(keypointNames(i));
+
+            % Set ith keypointOriginDistance to ith keypointName's corresponding origin distance
+            keypointOriginDistance(i) = ithKeypointOriginDistance;
+
+            % Set 2ith and 2ith+1 index of diagonal of D matrix to distance for current keypoint
+            diagonalIndex1 = 2*i-1;
+            diagonalIndex2 = 2*i;
+            keypointOriginDistanceMatrix(diagonalIndex1, diagonalIndex1) = ithKeypointOriginDistance;
+            keypointOriginDistanceMatrix(diagonalIndex2, diagonalIndex2) = ithKeypointOriginDistance;
         end
 
-        % Load the pose CSV file
-        pose = readmatrix(fullfile(camFolderPath, csvFile{1}));
-        
-        % Extract the distances (column 5) for each key point
-        d1 = keypoints{3, 5};
-        d2 = keypoints{4, 5};
-        d3 = keypoints{5, 5};
-        
-        % Define the projections from keypoints
-        P_i = [keypoints{3, 2}; keypoints{3, 3}];
-        P_j = [keypoints{4, 2}; keypoints{4, 3}];
-        P_k = [keypoints{5, 2}; keypoints{5, 3}];
-        
-        % Construct the system of equations to solve for the projection matrix elements
-        D = [
-            d1, 0, 0, 0, 0, 0;
-            0, d1, 0, 0, 0, 0;
-            0, 0, d2, 0, 0, 0;
-            0, 0, 0, d2, 0, 0;
-            0, 0, 0, 0, d3, 0;
-            0, 0, 0, 0, 0, d3;
-        ];
-    
-        p_vec = [P_i; P_j; P_k];
-    
-        % Solve for the projection matrix elements
-        m_vec = D \ p_vec;
-    
-        % Reshape the result into the 2x3 projection matrix
-        projection_mat = reshape(m_vec, [2, 3]);
-    
-        % Store projection matrix M for current camera into global struct
-        projection_mat_all{cam} = projection_mat;
-        
-        % Extract the x, y, and likelihood columns from the pose file
-        x_cols = 2:3:size(pose, 2);
-        y_cols = 3:3:size(pose, 2);
-        likelihood_cols = 4:3:size(pose, 2);
-        
-        % Store number of frames & bodyparts for current camera's pose data
-        num_frames = size(pose, 1);
-        num_bodyparts = length(x_cols);
+        % Iterate rows of Coordinates table to produce projections table for current camera, with original transition frames now corresponding to a projection matrix
+        for i = 1:keypointCoordinatesRows
+            % Get current row coordinates (keypoint columns only):
+            currRowCoordinates = keypointCoordinates(i, 2:end);
+            
+            % Get transition frame number for current row
+            transitionFrame = keypointCoordinates{i, 1}; % ERROR CHECK: Could just index by {i}
 
-        % Create matrix points and likelihoods for current camera
-        trajectories_all{cam} = zeros(num_frames, num_bodyparts, 2);
-        likelihoods_all{cam} = zeros(num_frames, num_bodyparts);
+            % Initialize P column vector for storing 2D points (observed, treated as projection of basis vectors constructed from distances)
+            P = zeros(6);
 
-        % Bodypart names
-        % bodypart_names = pose(2, 2:3:end);
+            % Iterate coordinates of keypoints in current row, corresponding to period of constant positions, to populate P
+            for keypointIndex = 1:keypointNamesLength
+                % Get coordinate <1x2 Double/Cell>
+                point2D = currRowCoordinates{keypointIndex};
 
-        % Fill the trajectories and likelihoods matrices
-        trajectories_all{cam}(:, :, 1) = pose(:, x_cols);
-        trajectories_all{cam}(:, :, 2) = pose(:, y_cols);
-        likelihoods_all{cam} = pose(:, likelihood_cols);
+                % Get x and y coordinates separately from point
+                point2D_x = point2D(1);
+                point2D_y = point2D(2);
+
+                % Populate P with x and y in column
+                P(keypointIndex*2-1) = point2D_x;
+                P(keypointIndex*2) = point2D_y;
+            end % ERROR CHECK: Are columns in the same order as keypointNames? If not, access coordinates in order of keypointNames
+
+            % Solve for parameters of M projection matrix as vector
+            D = keypointOriginDistanceMatrix;
+            m_vec = D \ P;
+
+            % Reshape parameters of M projection matrix from column vector to <2x3 Cell> matrix form
+            M = reshape(m_vec, [2,3]);
+
+            % Add entry for this transition frame (this projeciton matrix) to projectionTable
+            projectionTable{i, 1} = transitionFrame;
+            projectionTable{i, 2} = M;
+        end
+
+        % Add current projection table to corresponding cell in projections_all
+        projections_all{cam} = projectionTable;
     end
 
     % Initialize the points matrix
-    points = struct();
+    Trajectories = struct();
 
     % Initialize the progress bar
-    total_steps = num_bodyparts * num_frames;
+    total_steps = numBodyparts * numFrames;
     completed_steps = 0;
     waitbar_handle = waitbar(0, 'Processing...', 'Name', 'Weighted Least Squares Triangulation');
     tic; % Start timer
     
-    for bodypart = 1:num_bodyparts
+    for bodypart = 1:numBodyparts
         % Initialize b array for the current body part
-        b = zeros(num_frames, 3);
+        b = zeros(numFrames, 3);
+
+        % Get name of current bodypart
+        bodypartName = bodyparts(bodypart);
         
-        for frame = 1:num_frames
+        for frame = 1:numFrames
             % Initialize matrices for WLS equation for current frame
             X = [];
             W = [];
             y = [];
             
             for cam = 1:numCams
-                % Access projection mat M for current camera
-                projection_mat = projection_mat_all{cam};
-    
-                % Access likelihoods for current camera
-                likelihoods = likelihoods_all{cam};
+                % Get DLC struct for current camera
+                dlc_struct = dlc_structs_all{cam};
 
-                % Access x and y coordinates for current frame, cam, bp
-                x_point = trajectories_all{cam}(frame, bodypart, 1);
-                y_point = trajectories_all{cam}(frame, bodypart, 2);
-    
-                % Access likelihood for current frame, cam, bodypart
-                likelihood = likelihoods(frame, bodypart);
+                % Get projection table for current camera
+                projectionTable = projections_all{cam};
+
+                % Default, projection matrix is the last matrix
+                M = projectionTable{end, 2};
+
+                % If frame is less than the last transition
+                if frame < projectionTable{end, 1}
+                    % Find corresponding matrix to current frame
+                    for row = size(projectionTable, 1):-1:1
+                        % Get the transition frame
+                        transitionFrame = projectionTable{row, 1};
+                        % Check if the frame is less than
+                        if frame >= transitionFrame
+                            M = projectionTable{row,2};
+                            break;
+                        end
+                    end
+                end
     
                 % Add projection matrix for current camera to X
-                X = [X; projection_mat]; %#ok<AGROW>
+                X = [X; M]; %#ok<AGROW>
+
+                % Access x and y coordinates for current frame, cam, bp
+                x_point = dlc_struct.(bodypartName).x(frame);
+                y_point = dlc_struct.(bodypartName).y(frame);
+    
+                % Access likelihood for current frame, cam, bodypart
+                likelihood = dlc_struct.(bodypartName).likelihood(frame);
     
                 % Add likelihood twice to W
                 W = blkdiag(W, likelihood * eye(2));
