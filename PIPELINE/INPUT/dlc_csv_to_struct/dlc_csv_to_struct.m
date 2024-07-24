@@ -55,18 +55,17 @@ function dlc_csv_to_struct()
             
             xCoords = zeros(numLines, 1);
             yCoords = zeros(numLines, 1);
+            likelihoods = zeros(numLines, 1);
             
             for j = 1:numLines
                 lineData = strsplit(dataLines{j}, ',');
                 xCoords(j) = str2double(lineData{(i-1)*3 + 2});
                 yCoords(j) = str2double(lineData{(i-1)*3 + 3});
+                likelihoods(j) = str2double(lineData{(i-1)*3 + 4});
             end
             
-            % Create z coordinates as zeros
-            zCoords = zeros(size(xCoords));
-            
             % Assign to the struct
-            dataStruct.(partName) = struct('x', xCoords, 'y', yCoords, 'z', zCoords);
+            dataStruct.(partName) = struct('x', xCoords, 'y', yCoords, 'likelihood', likelihoods);
         end
 
         % Generate the .mat filename from the CSV filename
