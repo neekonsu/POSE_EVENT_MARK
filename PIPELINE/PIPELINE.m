@@ -12,14 +12,14 @@ addpath("./INPUT/dlc_csv_to_struct/"); % refactor script from dlc_to_simi_mat co
 
 %% INITIAL VARIABLES
 DLC_SOURCEDIR = nan;
-BR_SOURCEDIR = nan;
+% BR_SOURCEDIR = nan;
 CURR_TRIAL = struct();
 CURR_TRIAL.name = "";
 CURR_TRIAL.dir = nan;
 
 % Prompt user for core directories of source data - Deeplabcut videos directory - Blackrock ecog directory
 DLC_SOURCEDIR = uigetdir(".", "Please Select Directory of DeepLabCut Output (\'Videos/\')");
-BR_SOURCEDIR = uigetdir(".", "Please Select Directory of Blackrock Output (\'<TRIALNAME>_BLACKROCK\')"); % Check that this directory name matches the actual
+% BR_SOURCEDIR = uigetdir(".", "Please Select Directory of Blackrock Output (\'<TRIALNAME>_BLACKROCK\')"); % Check that this directory name matches the actual
 trialFolders = dir(fullfile(DLC_SOURCEDIR));
 trialFolders = trialFolders([trialFolders.isdir] & ~ismember({trialFolders.name}, {'.','..'}));
 
@@ -39,26 +39,26 @@ trialFolders = trialFolders([trialFolders.isdir] & ~ismember({trialFolders.name}
 % <trialName>/CAM<camNum>/<trialName>-<camNum><DLC_MODEL_NAME>.csv <~ 2D DLC Trajectory 
 
 % Create trial directories from names of videos within Deeplabcut 'videos' diretory, retain list of trial names and video names found.
-[trialNames, videoNames, trajectoryNames] = create_trial_folders(DLC_SOURCEDIR, BR_SOURCEDIR);
+[trialNames, videoNames, trajectoryNames] = create_trial_folders(DLC_SOURCEDIR);
 
-
-for i = 1:length(trialFolders)
-    % Access trial for current iteration
-    folder = trialFolders(i);
-    trialName = folder.name;
-
-    %% Step 2a: Extract Keypoints For Initial Frames
-    % IN: Trial Folder Structure (frame00001.png)
-    % OUT: Keypoints struct per trial/camera
-    % <trialName>/CAM<camNum>/<trialName>-<camNum>_keypoints.mat
-    extract_initial_keypoints(fullfile(DLC_SOURCEDIR, trialName));
-
-    %% Step 2b: Convert ECoG Data to .mat Files
-    % IN: Trial Folder Structure (Blackrock .ns5 and .ns6 Files)
-    % OUT: ECoG Data .mat file
-    % <trialName>/<trialName>_ecog.mat
-    % blackrock_to_struct(); % <<<< SKIPPING FOR NOW >>>>
-end
+% 
+% for i = 1:length(trialFolders)
+%     % Access trial for current iteration
+%     folder = trialFolders(i);
+%     trialName = folder.name;
+% 
+%     %% Step 2a: Extract Keypoints For Initial Frames
+%     % IN: Trial Folder Structure (frame00001.png)
+%     % OUT: Keypoints struct per trial/camera
+%     % <trialName>/CAM<camNum>/<trialName>-<camNum>_keypoints.mat
+%     extract_initial_keypoints(fullfile(DLC_SOURCEDIR, trialName));
+% 
+%     %% Step 2b: Convert ECoG Data to .mat Files
+%     % IN: Trial Folder Structure (Blackrock .ns5 and .ns6 Files)
+%     % OUT: ECoG Data .mat file
+%     % <trialName>/<trialName>_ecog.mat
+%     % blackrock_to_struct(); % <<<< SKIPPING FOR NOW >>>>
+% end
 
 %% Step 3a: Mark Events GUI
 % IN: Trial Folder Structure (DLC .mat Files and Videos)
