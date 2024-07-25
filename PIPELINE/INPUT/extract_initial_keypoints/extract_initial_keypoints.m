@@ -1,5 +1,5 @@
 function extract_initial_keypoints(trialDir)
-    % LABEL_KEYPOINTS   Function to label keypoints on frames in a given trial directory
+    % EXTRACT_INITIAL_KEYPOINTS   Function to label keypoints on frames in a given trial directory
     % trialDir: Directory containing folders for each camera angle during a
     % single trial. Typically 8 Camera Angles
 
@@ -14,7 +14,7 @@ function extract_initial_keypoints(trialDir)
 
     for i = 1:numCams
         % Read the first frame of the current camera
-        frame = imread(fullfile(folderPath, camFolders(i).name, 'frame00001.png'));
+        frame = imread(fullfile(folderPath, camFolders(i).name, 'frame0001.png'));
         
         % Get image size
         [imgHeight, imgWidth, ~] = size(frame);
@@ -44,17 +44,16 @@ function extract_initial_keypoints(trialDir)
         imshow(frame, 'Parent', ax); % Display the frame in the specified axes
         hold on; % Hold the current image for plotting
 
-        coordinates = -ones(length(keypoints), 2); % Initialize coordinates to -1 (for skipped points)
-        distances_m = zeros(length(keypoints) - 1, 1); % Initialize distances array (m)
-        distances_px = zeros(length(keypoints) - 1, 1); % Initialize distances array (px)
-        angles_rad = zeros(length(keypoints) - 1, 1); % Initialize angles array (rad)
-
+        % Initialize the data structure
+        data = struct();
+        data.transition_frame = 1;
+        
         % Prompt the user to select the origin
         title('Select the origin');
         [x_origin, y_origin] = ginput(1); % Get the (x, y) coordinates of the origin
         if ~isempty(x_origin)
             plot(x_origin, y_origin, 'ro'); % Plot the selected origin on the image
-            coordinates(1, :) = [x_origin, y_origin]; % Store the origin coordinates
+            data.origin = [x_origin, y_origin, 0]; % Store the origin coordinates (distance is 0)
         else
             errMsg = 'Origin must be selected to continue';
             disp(errMsg);
@@ -69,18 +68,12 @@ function extract_initial_keypoints(trialDir)
             [x, y] = ginput(1); % Get the (x, y) coordinates of the selected point
             if ~isempty(x)
                 plot(x, y, 'ro'); % Plot the selected point on the image
-                coordinates(k, :) = [x, y]; % Store the coordinates
-
-                % Calculate the distance in pixels
-                distances_px(k - 1) = sqrt((x - x_origin)^2 + (y - y_origin)^2);
-                
-                % Calculate the angle in radians
-                angles_rad(k - 1) = atan2(y - y_origin, x - x_origin);
                 
                 % Prompt the user to enter the distance to the origin in meters
                 distance_m = inputdlg(sprintf('Enter the distance between origin and %s (in meters):', keypoints{k}));
                 if ~isempty(distance_m)
-                    distances_m(k - 1) = str2double(distance_m{1}); % Store the distance in meters
+                    distance = str2double(distance_m{1}); % Store the distance in meters
+                    data.(keypoints{k}) = [x, y, distance]; % Store the coordinates and distance
                 else
                     errMsg = 'Distance must be entered to continue';
                     disp(errMsg);
@@ -88,36 +81,17 @@ function extract_initial_keypoints(trialDir)
                     close(hFig); % Close the figure
                     return;
                 end
+            else
+                data.(keypoints{k}) = [NaN, NaN, NaN]; % Store NaN for skipped points
             end
         end
 
-        % Combine coordinates, distances, and angles into one array
-        data = cell(length(keypoints) + 1, 6);
-        data(1, :) = {'Point', 'X (px)', 'Y (px)', 'Distance (px)', 'Distance (m)', 'Angle (rad)'};
-        data(2:end, 1) = keypoints';
-        data(2:end, 2:3) = num2cell(coordinates);
-        data(2:end, 4) = num2cell([0; distances_px]); % Distance in pixels
-        data(2:end, 5) = num2cell([0; distances_m]); % Distance in meters
-        data(2:end, 6) = num2cell([0; angles_rad]); % Angle in radians
+        % Convert the struct to a table
+        dataTable = struct2table(data);
 
-        % Save data to a CSV file
-        csvPath = fullfile(folderPath, camFolders(i).name, 'keypoints.csv');
-        fid = fopen(csvPath, 'w');
-        [rows, cols] = size(data);
-        for r = 1:rows
-            for c = 1:cols
-                var = data{r, c};
-                if isnumeric(var)
-                    var = num2str(var);
-                end
-                fprintf(fid, '%s', var);
-                if c < cols
-                    fprintf(fid, ',');
-                end
-            end
-            fprintf(fid, '\n');
-        end
-        fclose(fid);
+        % Save data to a MAT file
+        matPath = fullfile(folderPath, camFolders(i).name, 'keypoints.mat');
+        save(matPath, 'dataTable');
 
         close(hFig); % Close the figure
     end
