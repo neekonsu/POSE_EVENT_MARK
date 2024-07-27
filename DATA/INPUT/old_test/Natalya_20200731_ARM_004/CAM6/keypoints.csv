@@ -1,5 +1,0 @@
-Point,X (px),Y (px),Distance (px),Distance (m),Angle (rad)
-origin,29.25,154.25,0,0,0
-keypoint1,29.25,150.25,4,0,-1.5708
-keypoint2,29.25,150.25,4,NaN,-1.5708
-keypoint3,29.25,150.25,4,NaN,-1.5708
