@@ -164,3 +164,5 @@ DATA/INPUT/Natalya_20200731_ARM_003-6.avi filter=lfs diff=lfs merge=lfs -text
 DATA/INPUT/Natalya_20200731_ARM_PN_007-2.avi filter=lfs diff=lfs merge=lfs -text
 DATA/INPUT/Natalya_20200730_ARM_BC_014-3.avi filter=lfs diff=lfs merge=lfs -text
 DATA/INPUT/Natalya_20200730_ARM_PN_009-6.avi filter=lfs diff=lfs merge=lfs -text
+*.ns5 filter=lfs diff=lfs merge=lfs -text
+*.ns6 filter=lfs diff=lfs merge=lfs -text
